@@ -1,11 +1,7 @@
 ﻿using MailClient.Helpers;
-using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MailClient.DB
 {
@@ -29,13 +25,13 @@ namespace MailClient.DB
                             var item = new RSABookInfo()
                             {
                                 Id = reader.GetInt32(0),
-                                Email = reader.GetString(2),
-                                OwnPrivate = reader.GetString(3),
-                                OwnPublic = reader.GetString(4),
-                                OwnPrivateECP = reader.GetString(5),
-                                OwnPublicECP = reader.GetString(6),
-                                EmailPublic = reader.GetString(7),
-                                EmailPublicECP = reader.GetString(8)
+                                Email = reader.GetString(2).Trim(' '),
+                                OwnPrivate = reader.GetString(3).Trim(' '),
+                                OwnPublic = reader.GetString(4).Trim(' '),
+                                OwnPrivateECP = reader.GetString(5).Trim(' '),
+                                OwnPublicECP = reader.GetString(6).Trim(' '),
+                                EmailPublic = reader.GetString(7).Trim(' '),
+                                EmailPublicECP = reader.GetString(8).Trim(' ')
                             };
 
                             books.Add(item);

@@ -1,11 +1,7 @@
 ﻿using MailClient.Helpers;
-using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MailClient.DB
 {
@@ -106,7 +102,7 @@ namespace MailClient.DB
                          $"'{newItem.ImapPort}', '{newItem.Pop3Host}', '{newItem.Pop3Port}', " +
                          $"'{((newItem.IsSsl == true) ? 1 : 0)}')";
 
-            if (!IsDomainExists(connection, newItem.Domain) && (connection.State == ConnectionState.Open))
+            if (!IsDomainExists(connection, newItem.Domain))
             {
                 using (var cmd = new SQLiteCommand(reqStr, connection))
                 {
@@ -118,9 +114,9 @@ namespace MailClient.DB
             return false;
         }
 
-        public static bool RemoveServerInfo(SQLiteConnection connection, ServerInfo rmvItem)
+        public static bool RemoveServerInfo(SQLiteConnection connection, string domain)
         {
-            var reqStr = $"DELETE FROM Servers WHERE Servers.domain='{rmvItem.Domain}'";
+            var reqStr = $"DELETE FROM Servers WHERE Servers.domain='{domain}'";
 
             if (connection.State == ConnectionState.Open)
             {
