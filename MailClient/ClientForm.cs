@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MailClient.Helpers;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -21,10 +22,14 @@ namespace MailClient
             ServersTab = 3
         }
 
-        public ClientForm()
+        public MailClient StudMail;
+
+        public ClientForm(UserInfo user)
         {
             InitializeComponent();
 
+            StudMail = new MailClient(user);
+
             boxesList.Items.Add("asdgf");
             boxesList.Items.Add("asdgf");
             boxesList.Items.Add("asdgf");
@@ -32,6 +37,11 @@ namespace MailClient
             lettersList.Items.Add("qwerty");
             lettersList.Items.Add("qwerty");
 
+            InitFont();
+        }
+
+        private void InitFont()
+        {
             var fonts = new InstalledFontCollection();
 
             foreach (var item in fonts.Families)

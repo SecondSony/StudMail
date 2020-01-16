@@ -12,7 +12,6 @@ namespace MailClient
 {
     public class MailClient
     {
-        public DBConnection Database;
         public string CurrentFolder;
         public string Folder;
         public UserInfo CurrentUser;
@@ -20,10 +19,11 @@ namespace MailClient
         private Thread threadCheckNetwork;
         private static object lockObj;
 
-        public MailClient()
+        public MailClient(UserInfo user)
         {
-            Database = new DBConnection();
             CurrentFolder = "INBOX";
+            CurrentUser = user;
+            lockObj = new object();
             Folder = "";
             CurrentNetwork = NetworkStatus.Disconnected;
             threadCheckNetwork = new Thread(checkNetwork);

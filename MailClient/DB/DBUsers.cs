@@ -48,12 +48,12 @@ namespace MailClient.DB
                 if (IsAccountExists(connection, email, serverId))
                 {
                     UpdateAccountData(connection, email, password, serverId);
-                    user = GetLoginAccount(connection, email, password, (int) user.Server.Id);
+                    user = GetLoginAccount(connection, email, password, serverId);
                 }
                 else
                 {
-                    AddAccount(connection, user.Email, user.Password, (int) user.Server.Id);
-                    user = GetLoginAccount(connection, user.Email, user.Password, (int) user.Server.Id);
+                    AddAccount(connection, email, password, serverId);
+                    user = GetLoginAccount(connection, email, password, serverId);
                 }
 
                 return user;

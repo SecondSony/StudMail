@@ -16,12 +16,12 @@ namespace MailClient
 {
     public partial class LoginForm : Form
     {
-        public MailClient StudMail;
         public DBConnection DB;
 
         public LoginForm()
         {
             InitializeComponent();
+            DB = new DBConnection();
         }
 
         // TODO:
@@ -29,9 +29,9 @@ namespace MailClient
         {
             var email = emailTxt.Text.Trim(' ');
             var password = passwordTxt.Text;
-            var domain = AuthHelper.GetDomain(emailTxt.Text);
             ServerInfo mailServer;
             UserInfo user = new UserInfo();
+            int serverId;
 
             if (string.IsNullOrEmpty(email))
             {
@@ -51,6 +51,7 @@ namespace MailClient
                 return;
             }
 
+            var domain = AuthHelper.GetDomain(emailTxt.Text);
             mailServer = DBServers.GetServerInfo(DBConnection.Connection, domain);
 
             // Проверка поддерживаемых серверов
@@ -60,6 +61,8 @@ namespace MailClient
                 MessageBox.Show("Данный сервер не поддерживается на данный момент");
                 return;
             }
+
+            serverId = (int) mailServer.Id;
 
             // Проверка соединения если нашли поддерживаемый сервер
 
@@ -76,20 +79,36 @@ namespace MailClient
 
                         // Регистрируем или перезаписываем пользователя в базе данных
 
-                        user = DBUsers.AuthUser(DBConnection.Connection, email, password, (int) mailServer.Id);
+                        user = DBUsers.AuthUser(DBConnection.Connection, email, password, serverId);
                     }
                 }
                 catch (Exception)
                 {
                     MessageBox.Show("Ошибка соединения!");
                     checkInputPrv.SetError(passwordTxt, "Неверный email или пароль");
-                    throw;
+                    return;
+                }
+            }
+            else    // Если всё-таки нет соединения
+            {
+                // Проверяем наличие данного пользователя в БД
+                // Если есть, то авторизуемся локально и загружаем письма
+                // Если нет, то нужно вывести ошибку
+
+                if (DBUsers.GetLoginAccount(DBConnection.Connection, email, password, serverId) != null)
+                {
+                    user = DBUsers.AuthUser(DBConnection.Connection, email, password, serverId);
+                }
+                else
+                {
+                    checkInputPrv.SetError(emailTxt, "Локальная учётная запись с такими данными не существует");
+                    return;
                 }
             }
 
             passwordTxt.Text = "";
             Hide();
-            new ClientForm().ShowDialog(this);
+            new ClientForm(user).ShowDialog(this);
             Show();
         }
 
@@ -114,6 +133,11 @@ namespace MailClient
             var pingReply = ping.Send("google.com");
 
             return pingReply.Status.ToString().Equals("Success");
+        }
+
+        private void LoginForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            DBConnection.Close();
         }
     }
 }
