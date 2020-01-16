@@ -22,6 +22,17 @@ namespace MailClient.DB
 
         public static DBStatus Status;
 
+        public DBConnection()
+        {
+            DBConnect();
+            Open();
+        }
+
+        ~DBConnection()
+        {
+            Close();
+        }
+
         public static void DBConnect()
         {
             if (!File.Exists(dbName))

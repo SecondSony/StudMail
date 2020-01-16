@@ -57,7 +57,7 @@ namespace MailClient.DB
                          $"'{newItem.OwnPrivate}', '{newItem.OwnPublic}', '{newItem.OwnPrivateECP}', " +
                          $"'{newItem.OwnPublicECP}', '{newItem.EmailPublic}', '{newItem.EmailPublicECP}')";
 
-            if (IsBookExists(connection) && connection.State == ConnectionState.Open)
+            if (!IsBookExists(connection))
             {
                 using (var cmd = new SQLiteCommand(reqStr, connection))
                 {
@@ -73,7 +73,7 @@ namespace MailClient.DB
         {
             var reqStr = $"DELETE FROM RSABOOKS WHERE email='{rmvItem.Email}' AND user_id='{rmvItem.UserId}'";
 
-            if (IsBookExists(connection) && connection.State == ConnectionState.Open)
+            if (IsBookExists(connection))
             {
                 using (var cmd = new SQLiteCommand(reqStr, connection))
                 {

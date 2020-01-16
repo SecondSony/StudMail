@@ -118,7 +118,7 @@ namespace MailClient.DB
         {
             var reqStr = $"DELETE FROM Servers WHERE Servers.domain='{domain}'";
 
-            if (connection.State == ConnectionState.Open)
+            if (IsDomainExists(connection, domain))
             {
                 using (var cmd = new SQLiteCommand(reqStr, connection))
                 {

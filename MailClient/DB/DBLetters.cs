@@ -92,7 +92,7 @@ namespace MailClient.DB
             {
                 using (var cmd = new SQLiteCommand(reqStr, connection))
                 {
-                    var rowCount = (int)cmd.ExecuteScalar();
+                    var rowCount = (int) cmd.ExecuteScalar();
 
                     return rowCount > 0;
                 }
@@ -123,7 +123,7 @@ namespace MailClient.DB
         {
             var reqStr = $"DELETE FROM letters WHERE folder_id='{folderId}' and uid='{uid}'";
 
-            if (connection.State == ConnectionState.Open)
+            if (IsLetterExists(connection, folderId, uid))
             {
                 using (var cmd = new SQLiteCommand(reqStr, connection))
                 {

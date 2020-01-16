@@ -15,7 +15,7 @@ namespace MailClient.Helpers
 
     public class ServerInfo
     {
-        private long Id { get; set; }
+        public long Id { get; set; }
         public string Domain { get; set; }
         public string SmtpHost { get; set; }
         public long SmtpPort { get; set; }
@@ -28,11 +28,11 @@ namespace MailClient.Helpers
 
     public class UserInfo
     {
-        public long Id { get; private set; }
+        public long Id { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
-        public long ServerId { get; private set; }
-        public DBServers Server { get; private set; }
+        public long ServerId { get; set; }
+        public ServerInfo Server { get; set; }
         public List<FolderInfo> Folders { get; set; }
         public List<RSABookInfo> RSABooks { get; set; }
     }

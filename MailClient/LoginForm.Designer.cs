@@ -100,6 +100,7 @@
             this.signInBtn.Text = "Войти";
             this.signInBtn.UseVisualStyleBackColor = true;
             this.signInBtn.Click += new System.EventHandler(this.signInBtn_Click);
+            this.signInBtn.Enter += new System.EventHandler(this.emailTxt_Enter);
             // 
             // exitBtn
             // 
@@ -107,7 +108,7 @@
             this.exitBtn.Name = "exitBtn";
             this.exitBtn.Size = new System.Drawing.Size(175, 30);
             this.exitBtn.TabIndex = 3;
-            this.exitBtn.Text = "Выход";
+            this.exitBtn.Text = "Выйти";
             this.exitBtn.UseVisualStyleBackColor = true;
             this.exitBtn.Click += new System.EventHandler(this.exitBtn_Click);
             // 
