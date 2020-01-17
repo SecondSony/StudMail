@@ -63,6 +63,7 @@ namespace MailClient.DB
         public static DBStatus Close()
         {
             Connection.Close();
+            Connection = null;
             return DBStatus.Disconnected;
         }
     }

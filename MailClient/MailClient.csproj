@@ -93,6 +93,7 @@
     <Compile Include="DB\DBRSABooks.cs" />
     <Compile Include="DB\DBUsers.cs" />
     <Compile Include="Helpers\AuthHelper.cs" />
+    <Compile Include="Helpers\CheckHelper.cs" />
     <Compile Include="Helpers\CryptoHelper.cs" />
     <Compile Include="Helpers\DBHelper.cs" />
     <Compile Include="LoginForm.cs">

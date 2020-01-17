@@ -45,7 +45,6 @@ namespace MailClient.DB
 
         public static ServerInfo GetServerInfo(SQLiteConnection connection, string domain)
         {
-            var serverInfo = new ServerInfo();
             var reqStr = $"SELECT Servers.smtp_host, Servers.smtp_port, Servers.imap_host, " +
                          $"Servers.imap_port, Servers.pop3_host, Servers.pop3_port, Servers.ssl " +
                          $"FROM Servers WHERE Servers.domain='{domain}'";
@@ -56,9 +55,9 @@ namespace MailClient.DB
                 {
                     using (var reader = cmd.ExecuteReader())
                     {
-                        if (reader.HasRows)
+                        if (reader.Read())
                         {
-                            reader.Read();
+                            var serverInfo = new ServerInfo();
                             serverInfo.Domain = domain;
                             serverInfo.SmtpHost = reader.GetString(0).Trim(' ');
                             serverInfo.SmtpPort = reader.GetInt64(1);
@@ -79,22 +78,21 @@ namespace MailClient.DB
 
         public static bool IsDomainExists(SQLiteConnection connection, string domain)
         {
-            var reqStr = $"SELECT COUNT(Servers.domain) FROM Servers WHERE Servers.domain='{domain}'";
+            var reqStr = $"SELECT Servers.domain FROM Servers WHERE Servers.domain='{domain}'";
 
             if (connection.State == ConnectionState.Open)
             {
                 using (var cmd = new SQLiteCommand(reqStr, connection))
+                using (var reader = cmd.ExecuteReader())
                 {
-                    var rowCount = (int) cmd.ExecuteScalar();
-
-                    return rowCount > 0;
+                    return reader.HasRows;
                 }
             }
 
             return false;
         }
 
-        public static bool AddServerInfo(SQLiteConnection connection, ServerInfo newItem)
+        public static bool Add(SQLiteConnection connection, ServerInfo newItem)
         {
             var reqStr = $"INSERT INTO Servers(domain, smtp_host, smtp_port, imap_host, " +
                          $"imap_port, pop3_host, pop3_port, ssl) VALUES('{newItem.Domain}', " +
@@ -114,7 +112,7 @@ namespace MailClient.DB
             return false;
         }
 
-        public static bool RemoveServerInfo(SQLiteConnection connection, string domain)
+        public static bool Remove(SQLiteConnection connection, string domain)
         {
             var reqStr = $"DELETE FROM Servers WHERE Servers.domain='{domain}'";
 

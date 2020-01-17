@@ -11,8 +11,8 @@ namespace MailClient.DB
         {
             var books = new List<RSABookInfo>();
             var reqStr = $"SELECT id, user_id, email, own_private_key, own_public_key, " +
-                         $"own_private_key_ecp, own_public_key_ecp, email_public_key, " +
-                         $"email_public_key_ecp FROM RSABOOKS WHERE user_id = '{userId}'";
+                         $"own_pub_key_ecp, own_priv_key_ecp, email_public_key, " +
+                         $"email_public_key_ecp FROM RSABOOKS WHERE user_id = '{userId}' ";
 
             if (connection.State == ConnectionState.Open)
             {
@@ -25,6 +25,7 @@ namespace MailClient.DB
                             var item = new RSABookInfo()
                             {
                                 Id = reader.GetInt32(0),
+                                UserId = userId.ToString(),
                                 Email = reader.GetString(2).Trim(' '),
                                 OwnPrivate = reader.GetString(3).Trim(' '),
                                 OwnPublic = reader.GetString(4).Trim(' '),
@@ -49,7 +50,7 @@ namespace MailClient.DB
             return false;
         }
 
-        public static bool AddBookInfo(SQLiteConnection connection, RSABookInfo newItem)
+        public static bool Add(SQLiteConnection connection, RSABookInfo newItem)
         {
             var reqStr = $"INSERT INTO RSABOOKS (user_id, email, own_private_key, own_public_key, " +
                          $"own_private_key_ecp, own_public_key_ecp, email_public_key, " +
@@ -69,7 +70,7 @@ namespace MailClient.DB
             return false;
         }
 
-        public static bool RemoveBookInfo(SQLiteConnection connection, RSABookInfo rmvItem)
+        public static bool Remove(SQLiteConnection connection, RSABookInfo rmvItem)
         {
             var reqStr = $"DELETE FROM RSABOOKS WHERE email='{rmvItem.Email}' AND user_id='{rmvItem.UserId}'";
 

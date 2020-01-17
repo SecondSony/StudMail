@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Data.SQLite;
 using System.Drawing;
 using System.Linq;
 using System.Net.NetworkInformation;
@@ -16,12 +17,11 @@ namespace MailClient
 {
     public partial class LoginForm : Form
     {
-        public DBConnection DB;
-
         public LoginForm()
         {
             InitializeComponent();
-            DB = new DBConnection();
+            DBConnection.DBConnect();
+            DBConnection.Open();
         }
 
         // TODO:
@@ -45,7 +45,7 @@ namespace MailClient
                 return;
             }
 
-            if (!AuthHelper.IsValidEmail(email))
+            if (!CheckHelper.IsValidEmail(email))
             {
                 checkInputPrv.SetError(emailTxt, "Неверный адрес");
                 return;
@@ -73,7 +73,7 @@ namespace MailClient
                     using (var client = new SmtpClient())
                     {
                         client.ServerCertificateValidationCallback = (s, c, h, ex) => true;
-                        client.Connect(mailServer.SmtpHost, (int) mailServer.SmtpPort, true);
+                        client.Connect(mailServer.SmtpHost, (int) mailServer.SmtpPort, mailServer.IsSsl);
                         client.Authenticate(emailTxt.Text, passwordTxt.Text);
                         client.Disconnect(true);
 
@@ -82,9 +82,8 @@ namespace MailClient
                         user = DBUsers.AuthUser(DBConnection.Connection, email, password, serverId);
                     }
                 }
-                catch (Exception)
+                catch (SQLiteException)
                 {
-                    MessageBox.Show("Ошибка соединения!");
                     checkInputPrv.SetError(passwordTxt, "Неверный email или пароль");
                     return;
                 }
@@ -101,7 +100,8 @@ namespace MailClient
                 }
                 else
                 {
-                    checkInputPrv.SetError(emailTxt, "Локальная учётная запись с такими данными не существует");
+                    checkInputPrv.SetError(emailTxt, "Нет соединения с интернетом, а также локальная " +
+                                                     "учётная запись с такими данными не существует");
                     return;
                 }
             }
@@ -138,6 +138,7 @@ namespace MailClient
         private void LoginForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             DBConnection.Close();
+            Environment.Exit(0);
         }
     }
 }

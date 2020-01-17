@@ -82,7 +82,7 @@
             this.keysPage = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.keysTable = new System.Windows.Forms.DataGridView();
-            this.selectedCol = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.selectedKeyCol = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.emailCol = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.privateCol = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.publicCol = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -127,24 +127,27 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.pop3PortTxt = new System.Windows.Forms.TextBox();
-            this.pop3ServerTxt = new System.Windows.Forms.TextBox();
+            this.pop3HostTxt = new System.Windows.Forms.TextBox();
             this.imapPortTxt = new System.Windows.Forms.TextBox();
-            this.imapServerTxt = new System.Windows.Forms.TextBox();
+            this.imapHostTxt = new System.Windows.Forms.TextBox();
             this.smtpPortTxt = new System.Windows.Forms.TextBox();
-            this.smtpServerTxt = new System.Windows.Forms.TextBox();
-            this.domenTxt = new System.Windows.Forms.TextBox();
+            this.smtpHostTxt = new System.Windows.Forms.TextBox();
+            this.domainTxt = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.serversTable = new System.Windows.Forms.DataGridView();
-            this.selectionCol = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.domenCol = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.smtpServerCol = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.selectedServerCol = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.domainCol = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.smtpHostCol = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.smtpPortCol = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.imapServerCol = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.imapHostCol = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.imapPortCol = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.pop3ServerCol = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.pop3HostCol = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.pop3PortCol = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.sslCol = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.checkInputPrv = new System.Windows.Forms.ErrorProvider(this.components);
             this.tooltipHelper = new System.Windows.Forms.ToolTip(this.components);
+            this.updateBooksWorker = new System.ComponentModel.BackgroundWorker();
+            this.updateServersWorker = new System.ComponentModel.BackgroundWorker();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.lettersPage.SuspendLayout();
@@ -227,7 +230,7 @@
             this.msgLetterPanel.Location = new System.Drawing.Point(453, 3);
             this.msgLetterPanel.Name = "msgLetterPanel";
             this.msgLetterPanel.Size = new System.Drawing.Size(718, 490);
-            this.msgLetterPanel.TabIndex = 2;
+            this.msgLetterPanel.TabIndex = 5;
             // 
             // letterReadTablePanel
             // 
@@ -244,7 +247,7 @@
             this.letterReadTablePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 60F));
             this.letterReadTablePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 35F));
             this.letterReadTablePanel.Size = new System.Drawing.Size(718, 430);
-            this.letterReadTablePanel.TabIndex = 1;
+            this.letterReadTablePanel.TabIndex = 5;
             // 
             // letterReadOptionTablePanel
             // 
@@ -262,7 +265,7 @@
             this.letterReadOptionTablePanel.RowCount = 1;
             this.letterReadOptionTablePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.letterReadOptionTablePanel.Size = new System.Drawing.Size(716, 33);
-            this.letterReadOptionTablePanel.TabIndex = 0;
+            this.letterReadOptionTablePanel.TabIndex = 9;
             // 
             // keySignCheckBtn
             // 
@@ -276,7 +279,7 @@
             this.keySignCheckBtn.Margin = new System.Windows.Forms.Padding(1);
             this.keySignCheckBtn.Name = "keySignCheckBtn";
             this.keySignCheckBtn.Size = new System.Drawing.Size(238, 31);
-            this.keySignCheckBtn.TabIndex = 0;
+            this.keySignCheckBtn.TabIndex = 11;
             this.tooltipHelper.SetToolTip(this.keySignCheckBtn, "Проверить цифровую подпись");
             this.keySignCheckBtn.UseVisualStyleBackColor = true;
             // 
@@ -292,7 +295,7 @@
             this.decryptMsgBtn.Margin = new System.Windows.Forms.Padding(1);
             this.decryptMsgBtn.Name = "decryptMsgBtn";
             this.decryptMsgBtn.Size = new System.Drawing.Size(236, 31);
-            this.decryptMsgBtn.TabIndex = 0;
+            this.decryptMsgBtn.TabIndex = 10;
             this.tooltipHelper.SetToolTip(this.decryptMsgBtn, "Расшифровать");
             this.decryptMsgBtn.UseVisualStyleBackColor = true;
             // 
@@ -308,7 +311,7 @@
             this.detachFilesBtn.Margin = new System.Windows.Forms.Padding(1);
             this.detachFilesBtn.Name = "detachFilesBtn";
             this.detachFilesBtn.Size = new System.Drawing.Size(236, 31);
-            this.detachFilesBtn.TabIndex = 0;
+            this.detachFilesBtn.TabIndex = 9;
             this.tooltipHelper.SetToolTip(this.detachFilesBtn, "Открепить файлы");
             this.detachFilesBtn.UseVisualStyleBackColor = true;
             // 
@@ -319,7 +322,7 @@
             this.msgReadWeb.MinimumSize = new System.Drawing.Size(20, 20);
             this.msgReadWeb.Name = "msgReadWeb";
             this.msgReadWeb.Size = new System.Drawing.Size(712, 329);
-            this.msgReadWeb.TabIndex = 1;
+            this.msgReadWeb.TabIndex = 7;
             // 
             // detachFilesList
             // 
@@ -329,7 +332,7 @@
             this.detachFilesList.MultiSelect = false;
             this.detachFilesList.Name = "detachFilesList";
             this.detachFilesList.Size = new System.Drawing.Size(712, 54);
-            this.detachFilesList.TabIndex = 2;
+            this.detachFilesList.TabIndex = 8;
             this.detachFilesList.UseCompatibleStateImageBehavior = false;
             // 
             // letterHeaderTablePanel
@@ -349,7 +352,7 @@
             this.letterHeaderTablePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.letterHeaderTablePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.letterHeaderTablePanel.Size = new System.Drawing.Size(718, 60);
-            this.letterHeaderTablePanel.TabIndex = 0;
+            this.letterHeaderTablePanel.TabIndex = 5;
             // 
             // senderEmailLbl
             // 
@@ -382,7 +385,7 @@
             this.senderEmailTxt.Name = "senderEmailTxt";
             this.senderEmailTxt.ReadOnly = true;
             this.senderEmailTxt.Size = new System.Drawing.Size(642, 26);
-            this.senderEmailTxt.TabIndex = 0;
+            this.senderEmailTxt.TabIndex = 5;
             // 
             // themeReadTxt
             // 
@@ -393,7 +396,7 @@
             this.themeReadTxt.Name = "themeReadTxt";
             this.themeReadTxt.ReadOnly = true;
             this.themeReadTxt.Size = new System.Drawing.Size(642, 26);
-            this.themeReadTxt.TabIndex = 1;
+            this.themeReadTxt.TabIndex = 6;
             // 
             // lettersTablePanel
             // 
@@ -420,7 +423,7 @@
             this.msgListOptionsPanel.Margin = new System.Windows.Forms.Padding(1);
             this.msgListOptionsPanel.Name = "msgListOptionsPanel";
             this.msgListOptionsPanel.Size = new System.Drawing.Size(298, 33);
-            this.msgListOptionsPanel.TabIndex = 0;
+            this.msgListOptionsPanel.TabIndex = 2;
             // 
             // rightBtn
             // 
@@ -434,7 +437,7 @@
             this.rightBtn.Margin = new System.Windows.Forms.Padding(1);
             this.rightBtn.Name = "rightBtn";
             this.rightBtn.Size = new System.Drawing.Size(145, 33);
-            this.rightBtn.TabIndex = 0;
+            this.rightBtn.TabIndex = 3;
             this.rightBtn.UseVisualStyleBackColor = true;
             // 
             // leftBtn
@@ -449,7 +452,7 @@
             this.leftBtn.Margin = new System.Windows.Forms.Padding(1);
             this.leftBtn.Name = "leftBtn";
             this.leftBtn.Size = new System.Drawing.Size(145, 33);
-            this.leftBtn.TabIndex = 0;
+            this.leftBtn.TabIndex = 2;
             this.leftBtn.UseVisualStyleBackColor = true;
             // 
             // lettersList
@@ -504,7 +507,7 @@
             this.msgSendTxt.Name = "msgSendTxt";
             this.msgSendTxt.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.ForcedVertical;
             this.msgSendTxt.Size = new System.Drawing.Size(1168, 335);
-            this.msgSendTxt.TabIndex = 5;
+            this.msgSendTxt.TabIndex = 11;
             this.msgSendTxt.Text = "";
             // 
             // panel4
@@ -534,7 +537,7 @@
             this.underlineBtn.Location = new System.Drawing.Point(622, 7);
             this.underlineBtn.Name = "underlineBtn";
             this.underlineBtn.Size = new System.Drawing.Size(30, 30);
-            this.underlineBtn.TabIndex = 2;
+            this.underlineBtn.TabIndex = 9;
             this.tooltipHelper.SetToolTip(this.underlineBtn, "Подчёркнутый");
             this.underlineBtn.UseVisualStyleBackColor = false;
             this.underlineBtn.Click += new System.EventHandler(this.underlineBtn_Click);
@@ -549,7 +552,7 @@
             this.italicBtn.Location = new System.Drawing.Point(586, 7);
             this.italicBtn.Name = "italicBtn";
             this.italicBtn.Size = new System.Drawing.Size(30, 30);
-            this.italicBtn.TabIndex = 2;
+            this.italicBtn.TabIndex = 8;
             this.tooltipHelper.SetToolTip(this.italicBtn, "Курсив");
             this.italicBtn.UseVisualStyleBackColor = false;
             this.italicBtn.Click += new System.EventHandler(this.italicBtn_Click);
@@ -564,7 +567,7 @@
             this.boldBtn.Location = new System.Drawing.Point(550, 7);
             this.boldBtn.Name = "boldBtn";
             this.boldBtn.Size = new System.Drawing.Size(30, 30);
-            this.boldBtn.TabIndex = 2;
+            this.boldBtn.TabIndex = 7;
             this.tooltipHelper.SetToolTip(this.boldBtn, "Полужирный");
             this.boldBtn.UseVisualStyleBackColor = false;
             this.boldBtn.Click += new System.EventHandler(this.boldBtn_Click);
@@ -579,7 +582,7 @@
             this.strikeOutBtn.Location = new System.Drawing.Point(658, 7);
             this.strikeOutBtn.Name = "strikeOutBtn";
             this.strikeOutBtn.Size = new System.Drawing.Size(35, 35);
-            this.strikeOutBtn.TabIndex = 2;
+            this.strikeOutBtn.TabIndex = 10;
             this.tooltipHelper.SetToolTip(this.strikeOutBtn, "Вычеркнутый");
             this.strikeOutBtn.UseVisualStyleBackColor = false;
             this.strikeOutBtn.Click += new System.EventHandler(this.strikeOutBtn_Click);
@@ -594,7 +597,7 @@
             this.alignRightBtn.Location = new System.Drawing.Point(447, 3);
             this.alignRightBtn.Name = "alignRightBtn";
             this.alignRightBtn.Size = new System.Drawing.Size(35, 35);
-            this.alignRightBtn.TabIndex = 2;
+            this.alignRightBtn.TabIndex = 6;
             this.tooltipHelper.SetToolTip(this.alignRightBtn, "Выровнять по правому краю");
             this.alignRightBtn.UseVisualStyleBackColor = false;
             this.alignRightBtn.Click += new System.EventHandler(this.alignRightBtn_Click);
@@ -609,7 +612,7 @@
             this.alignCenterBtn.Location = new System.Drawing.Point(406, 3);
             this.alignCenterBtn.Name = "alignCenterBtn";
             this.alignCenterBtn.Size = new System.Drawing.Size(35, 35);
-            this.alignCenterBtn.TabIndex = 2;
+            this.alignCenterBtn.TabIndex = 5;
             this.tooltipHelper.SetToolTip(this.alignCenterBtn, "Выровнять по центру");
             this.alignCenterBtn.UseVisualStyleBackColor = false;
             this.alignCenterBtn.Click += new System.EventHandler(this.alignCenterBtn_Click);
@@ -624,7 +627,7 @@
             this.alignLeftBtn.Location = new System.Drawing.Point(365, 3);
             this.alignLeftBtn.Name = "alignLeftBtn";
             this.alignLeftBtn.Size = new System.Drawing.Size(35, 35);
-            this.alignLeftBtn.TabIndex = 2;
+            this.alignLeftBtn.TabIndex = 4;
             this.tooltipHelper.SetToolTip(this.alignLeftBtn, "Выровнять по левому краю");
             this.alignLeftBtn.UseVisualStyleBackColor = false;
             this.alignLeftBtn.Click += new System.EventHandler(this.alignLeftBtn_Click);
@@ -645,7 +648,7 @@
             0});
             this.fontSizeBtn.Name = "fontSizeBtn";
             this.fontSizeBtn.Size = new System.Drawing.Size(50, 26);
-            this.fontSizeBtn.TabIndex = 1;
+            this.fontSizeBtn.TabIndex = 3;
             this.fontSizeBtn.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.tooltipHelper.SetToolTip(this.fontSizeBtn, "Размер шрифта");
             this.fontSizeBtn.Value = new decimal(new int[] {
@@ -666,7 +669,7 @@
             this.fontsCmb.Name = "fontsCmb";
             this.fontsCmb.Size = new System.Drawing.Size(250, 28);
             this.fontsCmb.Sorted = true;
-            this.fontsCmb.TabIndex = 0;
+            this.fontsCmb.TabIndex = 2;
             this.tooltipHelper.SetToolTip(this.fontsCmb, "Шрифт");
             this.fontsCmb.SelectedIndexChanged += new System.EventHandler(this.fontsCmb_SelectedIndexChanged);
             // 
@@ -738,7 +741,7 @@
             this.receiverEmailTxt.Location = new System.Drawing.Point(63, 3);
             this.receiverEmailTxt.Name = "receiverEmailTxt";
             this.receiverEmailTxt.Size = new System.Drawing.Size(1102, 26);
-            this.receiverEmailTxt.TabIndex = 1;
+            this.receiverEmailTxt.TabIndex = 0;
             // 
             // letterSendOptionsTablePanel
             // 
@@ -771,7 +774,7 @@
             this.attachFilesList.MultiSelect = false;
             this.attachFilesList.Name = "attachFilesList";
             this.attachFilesList.Size = new System.Drawing.Size(912, 44);
-            this.attachFilesList.TabIndex = 0;
+            this.attachFilesList.TabIndex = 12;
             this.tooltipHelper.SetToolTip(this.attachFilesList, "Приклепляемые файлы");
             this.attachFilesList.UseCompatibleStateImageBehavior = false;
             // 
@@ -786,7 +789,7 @@
             this.attachFilesBtn.Location = new System.Drawing.Point(921, 3);
             this.attachFilesBtn.Name = "attachFilesBtn";
             this.attachFilesBtn.Size = new System.Drawing.Size(44, 44);
-            this.attachFilesBtn.TabIndex = 2;
+            this.attachFilesBtn.TabIndex = 13;
             this.tooltipHelper.SetToolTip(this.attachFilesBtn, "Прикрепить файлы");
             this.attachFilesBtn.UseVisualStyleBackColor = false;
             this.attachFilesBtn.Click += new System.EventHandler(this.attachFilesBtn_Click);
@@ -802,7 +805,7 @@
             this.encryptMsgBtn.Location = new System.Drawing.Point(1021, 3);
             this.encryptMsgBtn.Name = "encryptMsgBtn";
             this.encryptMsgBtn.Size = new System.Drawing.Size(44, 44);
-            this.encryptMsgBtn.TabIndex = 2;
+            this.encryptMsgBtn.TabIndex = 15;
             this.tooltipHelper.SetToolTip(this.encryptMsgBtn, "Зашифровать сообщение");
             this.encryptMsgBtn.UseVisualStyleBackColor = false;
             this.encryptMsgBtn.Click += new System.EventHandler(this.encryptMsgBtn_Click);
@@ -818,7 +821,7 @@
             this.keySignMsgBtn.Location = new System.Drawing.Point(1071, 3);
             this.keySignMsgBtn.Name = "keySignMsgBtn";
             this.keySignMsgBtn.Size = new System.Drawing.Size(44, 44);
-            this.keySignMsgBtn.TabIndex = 2;
+            this.keySignMsgBtn.TabIndex = 16;
             this.tooltipHelper.SetToolTip(this.keySignMsgBtn, "Организовать цифровую подпись");
             this.keySignMsgBtn.UseVisualStyleBackColor = false;
             this.keySignMsgBtn.Click += new System.EventHandler(this.keySignMsgBtn_Click);
@@ -834,7 +837,7 @@
             this.letterSendBtn.Location = new System.Drawing.Point(1121, 3);
             this.letterSendBtn.Name = "letterSendBtn";
             this.letterSendBtn.Size = new System.Drawing.Size(44, 44);
-            this.letterSendBtn.TabIndex = 2;
+            this.letterSendBtn.TabIndex = 17;
             this.tooltipHelper.SetToolTip(this.letterSendBtn, "Отправить сообщение");
             this.letterSendBtn.UseVisualStyleBackColor = false;
             this.letterSendBtn.Click += new System.EventHandler(this.letterSendBtn_Click);
@@ -850,7 +853,7 @@
             this.detachLastFileBtn.Location = new System.Drawing.Point(971, 3);
             this.detachLastFileBtn.Name = "detachLastFileBtn";
             this.detachLastFileBtn.Size = new System.Drawing.Size(44, 44);
-            this.detachLastFileBtn.TabIndex = 2;
+            this.detachLastFileBtn.TabIndex = 14;
             this.tooltipHelper.SetToolTip(this.detachLastFileBtn, "Открепить последний файл");
             this.detachLastFileBtn.UseVisualStyleBackColor = false;
             this.detachLastFileBtn.Click += new System.EventHandler(this.detachLastFileBtn_Click);
@@ -888,7 +891,7 @@
             this.keysTable.BackgroundColor = System.Drawing.SystemColors.Control;
             this.keysTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.keysTable.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.selectedCol,
+            this.selectedKeyCol,
             this.emailCol,
             this.privateCol,
             this.publicCol,
@@ -903,15 +906,17 @@
             this.keysTable.RowHeadersWidth = 51;
             this.keysTable.RowTemplate.Height = 24;
             this.keysTable.Size = new System.Drawing.Size(862, 484);
-            this.keysTable.TabIndex = 2;
+            this.keysTable.TabIndex = 10;
+            this.keysTable.TabStop = false;
             // 
-            // selectedCol
+            // selectedKeyCol
             // 
-            this.selectedCol.Frozen = true;
-            this.selectedCol.HeaderText = "";
-            this.selectedCol.MinimumWidth = 25;
-            this.selectedCol.Name = "selectedCol";
-            this.selectedCol.Width = 25;
+            this.selectedKeyCol.Frozen = true;
+            this.selectedKeyCol.HeaderText = "";
+            this.selectedKeyCol.MinimumWidth = 25;
+            this.selectedKeyCol.Name = "selectedKeyCol";
+            this.selectedKeyCol.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.selectedKeyCol.Width = 25;
             // 
             // emailCol
             // 
@@ -1003,7 +1008,7 @@
             this.remoteGrp.Location = new System.Drawing.Point(5, 211);
             this.remoteGrp.Name = "remoteGrp";
             this.remoteGrp.Size = new System.Drawing.Size(286, 100);
-            this.remoteGrp.TabIndex = 6;
+            this.remoteGrp.TabIndex = 5;
             this.remoteGrp.TabStop = false;
             this.remoteGrp.Text = "Удалённый пользователь";
             // 
@@ -1022,7 +1027,7 @@
             this.keysRemoteTxt.Location = new System.Drawing.Point(150, 21);
             this.keysRemoteTxt.Name = "keysRemoteTxt";
             this.keysRemoteTxt.Size = new System.Drawing.Size(125, 26);
-            this.keysRemoteTxt.TabIndex = 1;
+            this.keysRemoteTxt.TabIndex = 6;
             this.keysRemoteTxt.Enter += new System.EventHandler(this.keysRemoteTxt_Enter);
             // 
             // keysRemoteSignTxt
@@ -1031,7 +1036,7 @@
             this.keysRemoteSignTxt.Location = new System.Drawing.Point(150, 53);
             this.keysRemoteSignTxt.Name = "keysRemoteSignTxt";
             this.keysRemoteSignTxt.Size = new System.Drawing.Size(125, 26);
-            this.keysRemoteSignTxt.TabIndex = 1;
+            this.keysRemoteSignTxt.TabIndex = 7;
             this.keysRemoteSignTxt.Enter += new System.EventHandler(this.keysRemoteSignTxt_Enter);
             // 
             // label10
@@ -1051,7 +1056,7 @@
             this.genKeysGrp.Location = new System.Drawing.Point(0, 409);
             this.genKeysGrp.Name = "genKeysGrp";
             this.genKeysGrp.Size = new System.Drawing.Size(294, 75);
-            this.genKeysGrp.TabIndex = 5;
+            this.genKeysGrp.TabIndex = 10;
             this.genKeysGrp.TabStop = false;
             this.genKeysGrp.Text = "Генерация";
             // 
@@ -1061,7 +1066,7 @@
             this.genKeySignBtn.Location = new System.Drawing.Point(150, 22);
             this.genKeySignBtn.Name = "genKeySignBtn";
             this.genKeySignBtn.Size = new System.Drawing.Size(130, 30);
-            this.genKeySignBtn.TabIndex = 4;
+            this.genKeySignBtn.TabIndex = 12;
             this.genKeySignBtn.Text = "Ключи ЭЦП";
             this.genKeySignBtn.UseVisualStyleBackColor = true;
             this.genKeySignBtn.Click += new System.EventHandler(this.genKeySignBtn_Click);
@@ -1072,7 +1077,7 @@
             this.genKeyBtn.Location = new System.Drawing.Point(13, 22);
             this.genKeyBtn.Name = "genKeyBtn";
             this.genKeyBtn.Size = new System.Drawing.Size(130, 30);
-            this.genKeyBtn.TabIndex = 4;
+            this.genKeyBtn.TabIndex = 11;
             this.genKeyBtn.Text = "Ключи";
             this.genKeyBtn.UseVisualStyleBackColor = true;
             this.genKeyBtn.Click += new System.EventHandler(this.genKeyBtn_Click);
@@ -1083,7 +1088,7 @@
             this.removeKeysBtn.Location = new System.Drawing.Point(13, 370);
             this.removeKeysBtn.Name = "removeKeysBtn";
             this.removeKeysBtn.Size = new System.Drawing.Size(267, 30);
-            this.removeKeysBtn.TabIndex = 4;
+            this.removeKeysBtn.TabIndex = 9;
             this.removeKeysBtn.Text = "Удалить выбранные";
             this.removeKeysBtn.UseVisualStyleBackColor = true;
             this.removeKeysBtn.Click += new System.EventHandler(this.removeKeysBtn_Click);
@@ -1094,7 +1099,7 @@
             this.addKeysBtn.Location = new System.Drawing.Point(13, 325);
             this.addKeysBtn.Name = "addKeysBtn";
             this.addKeysBtn.Size = new System.Drawing.Size(267, 30);
-            this.addKeysBtn.TabIndex = 4;
+            this.addKeysBtn.TabIndex = 8;
             this.addKeysBtn.Text = "Добавить запись";
             this.addKeysBtn.UseVisualStyleBackColor = true;
             this.addKeysBtn.Click += new System.EventHandler(this.addKeysBtn_Click);
@@ -1150,7 +1155,7 @@
             this.keysPublicSignTxt.Location = new System.Drawing.Point(155, 178);
             this.keysPublicSignTxt.Name = "keysPublicSignTxt";
             this.keysPublicSignTxt.Size = new System.Drawing.Size(125, 26);
-            this.keysPublicSignTxt.TabIndex = 1;
+            this.keysPublicSignTxt.TabIndex = 4;
             this.keysPublicSignTxt.Enter += new System.EventHandler(this.keysPublicSignTxt_Enter);
             // 
             // keysPrivateSignTxt
@@ -1159,7 +1164,7 @@
             this.keysPrivateSignTxt.Location = new System.Drawing.Point(155, 146);
             this.keysPrivateSignTxt.Name = "keysPrivateSignTxt";
             this.keysPrivateSignTxt.Size = new System.Drawing.Size(125, 26);
-            this.keysPrivateSignTxt.TabIndex = 1;
+            this.keysPrivateSignTxt.TabIndex = 3;
             this.keysPrivateSignTxt.Enter += new System.EventHandler(this.keysPrivateSignTxt_Enter);
             // 
             // keysPublicTxt
@@ -1168,7 +1173,7 @@
             this.keysPublicTxt.Location = new System.Drawing.Point(155, 114);
             this.keysPublicTxt.Name = "keysPublicTxt";
             this.keysPublicTxt.Size = new System.Drawing.Size(125, 26);
-            this.keysPublicTxt.TabIndex = 1;
+            this.keysPublicTxt.TabIndex = 2;
             this.keysPublicTxt.Enter += new System.EventHandler(this.keysPublicTxt_Enter);
             // 
             // keysPrivateTxt
@@ -1186,7 +1191,7 @@
             this.keysEmailTxt.Location = new System.Drawing.Point(155, 50);
             this.keysEmailTxt.Name = "keysEmailTxt";
             this.keysEmailTxt.Size = new System.Drawing.Size(125, 26);
-            this.keysEmailTxt.TabIndex = 1;
+            this.keysEmailTxt.TabIndex = 0;
             this.keysEmailTxt.Enter += new System.EventHandler(this.keysEmailTxt_Enter);
             // 
             // label16
@@ -1239,12 +1244,12 @@
             this.panel1.Controls.Add(this.label3);
             this.panel1.Controls.Add(this.label2);
             this.panel1.Controls.Add(this.pop3PortTxt);
-            this.panel1.Controls.Add(this.pop3ServerTxt);
+            this.panel1.Controls.Add(this.pop3HostTxt);
             this.panel1.Controls.Add(this.imapPortTxt);
-            this.panel1.Controls.Add(this.imapServerTxt);
+            this.panel1.Controls.Add(this.imapHostTxt);
             this.panel1.Controls.Add(this.smtpPortTxt);
-            this.panel1.Controls.Add(this.smtpServerTxt);
-            this.panel1.Controls.Add(this.domenTxt);
+            this.panel1.Controls.Add(this.smtpHostTxt);
+            this.panel1.Controls.Add(this.domainTxt);
             this.panel1.Controls.Add(this.label1);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(871, 3);
@@ -1258,7 +1263,7 @@
             this.removeServersBtn.Location = new System.Drawing.Point(13, 360);
             this.removeServersBtn.Name = "removeServersBtn";
             this.removeServersBtn.Size = new System.Drawing.Size(267, 30);
-            this.removeServersBtn.TabIndex = 4;
+            this.removeServersBtn.TabIndex = 9;
             this.removeServersBtn.Text = "Удалить выбранные";
             this.removeServersBtn.UseVisualStyleBackColor = true;
             this.removeServersBtn.Click += new System.EventHandler(this.removeServersBtn_Click);
@@ -1269,7 +1274,7 @@
             this.addServerBtn.Location = new System.Drawing.Point(13, 320);
             this.addServerBtn.Name = "addServerBtn";
             this.addServerBtn.Size = new System.Drawing.Size(267, 30);
-            this.addServerBtn.TabIndex = 4;
+            this.addServerBtn.TabIndex = 8;
             this.addServerBtn.Text = "Добавить сервер";
             this.addServerBtn.UseVisualStyleBackColor = true;
             this.addServerBtn.Click += new System.EventHandler(this.addServerBtn_Click);
@@ -1280,7 +1285,7 @@
             this.sslCheck.Location = new System.Drawing.Point(13, 285);
             this.sslCheck.Name = "sslCheck";
             this.sslCheck.Size = new System.Drawing.Size(109, 21);
-            this.sslCheck.TabIndex = 3;
+            this.sslCheck.TabIndex = 7;
             this.sslCheck.Text = "SSL защита";
             this.sslCheck.UseVisualStyleBackColor = true;
             // 
@@ -1353,17 +1358,17 @@
             this.pop3PortTxt.Location = new System.Drawing.Point(116, 242);
             this.pop3PortTxt.Name = "pop3PortTxt";
             this.pop3PortTxt.Size = new System.Drawing.Size(164, 26);
-            this.pop3PortTxt.TabIndex = 1;
+            this.pop3PortTxt.TabIndex = 6;
             this.pop3PortTxt.Enter += new System.EventHandler(this.pop3PortTxt_Enter);
             // 
-            // pop3ServerTxt
+            // pop3HostTxt
             // 
-            this.pop3ServerTxt.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.pop3ServerTxt.Location = new System.Drawing.Point(116, 210);
-            this.pop3ServerTxt.Name = "pop3ServerTxt";
-            this.pop3ServerTxt.Size = new System.Drawing.Size(164, 26);
-            this.pop3ServerTxt.TabIndex = 1;
-            this.pop3ServerTxt.Enter += new System.EventHandler(this.pop3ServerTxt_Enter);
+            this.pop3HostTxt.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.pop3HostTxt.Location = new System.Drawing.Point(116, 210);
+            this.pop3HostTxt.Name = "pop3HostTxt";
+            this.pop3HostTxt.Size = new System.Drawing.Size(164, 26);
+            this.pop3HostTxt.TabIndex = 5;
+            this.pop3HostTxt.Enter += new System.EventHandler(this.pop3ServerTxt_Enter);
             // 
             // imapPortTxt
             // 
@@ -1371,17 +1376,17 @@
             this.imapPortTxt.Location = new System.Drawing.Point(116, 178);
             this.imapPortTxt.Name = "imapPortTxt";
             this.imapPortTxt.Size = new System.Drawing.Size(164, 26);
-            this.imapPortTxt.TabIndex = 1;
+            this.imapPortTxt.TabIndex = 4;
             this.imapPortTxt.Enter += new System.EventHandler(this.imapPortTxt_Enter);
             // 
-            // imapServerTxt
+            // imapHostTxt
             // 
-            this.imapServerTxt.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.imapServerTxt.Location = new System.Drawing.Point(116, 146);
-            this.imapServerTxt.Name = "imapServerTxt";
-            this.imapServerTxt.Size = new System.Drawing.Size(164, 26);
-            this.imapServerTxt.TabIndex = 1;
-            this.imapServerTxt.Enter += new System.EventHandler(this.imapServerTxt_Enter);
+            this.imapHostTxt.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.imapHostTxt.Location = new System.Drawing.Point(116, 146);
+            this.imapHostTxt.Name = "imapHostTxt";
+            this.imapHostTxt.Size = new System.Drawing.Size(164, 26);
+            this.imapHostTxt.TabIndex = 3;
+            this.imapHostTxt.Enter += new System.EventHandler(this.imapServerTxt_Enter);
             // 
             // smtpPortTxt
             // 
@@ -1389,26 +1394,26 @@
             this.smtpPortTxt.Location = new System.Drawing.Point(116, 114);
             this.smtpPortTxt.Name = "smtpPortTxt";
             this.smtpPortTxt.Size = new System.Drawing.Size(164, 26);
-            this.smtpPortTxt.TabIndex = 1;
+            this.smtpPortTxt.TabIndex = 2;
             this.smtpPortTxt.Enter += new System.EventHandler(this.smtpPortTxt_Enter);
             // 
-            // smtpServerTxt
+            // smtpHostTxt
             // 
-            this.smtpServerTxt.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.smtpServerTxt.Location = new System.Drawing.Point(116, 82);
-            this.smtpServerTxt.Name = "smtpServerTxt";
-            this.smtpServerTxt.Size = new System.Drawing.Size(164, 26);
-            this.smtpServerTxt.TabIndex = 1;
-            this.smtpServerTxt.Enter += new System.EventHandler(this.smtpServerTxt_Enter);
+            this.smtpHostTxt.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.smtpHostTxt.Location = new System.Drawing.Point(116, 82);
+            this.smtpHostTxt.Name = "smtpHostTxt";
+            this.smtpHostTxt.Size = new System.Drawing.Size(164, 26);
+            this.smtpHostTxt.TabIndex = 1;
+            this.smtpHostTxt.Enter += new System.EventHandler(this.smtpServerTxt_Enter);
             // 
-            // domenTxt
+            // domainTxt
             // 
-            this.domenTxt.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.domenTxt.Location = new System.Drawing.Point(116, 50);
-            this.domenTxt.Name = "domenTxt";
-            this.domenTxt.Size = new System.Drawing.Size(164, 26);
-            this.domenTxt.TabIndex = 1;
-            this.domenTxt.Enter += new System.EventHandler(this.domenTxt_Enter);
+            this.domainTxt.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.domainTxt.Location = new System.Drawing.Point(116, 50);
+            this.domainTxt.Name = "domainTxt";
+            this.domainTxt.Size = new System.Drawing.Size(164, 26);
+            this.domainTxt.TabIndex = 0;
+            this.domainTxt.Enter += new System.EventHandler(this.domenTxt_Enter);
             // 
             // label1
             // 
@@ -1428,14 +1433,15 @@
             this.serversTable.BackgroundColor = System.Drawing.SystemColors.Control;
             this.serversTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.serversTable.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.selectionCol,
-            this.domenCol,
-            this.smtpServerCol,
+            this.selectedServerCol,
+            this.domainCol,
+            this.smtpHostCol,
             this.smtpPortCol,
-            this.imapServerCol,
+            this.imapHostCol,
             this.imapPortCol,
-            this.pop3ServerCol,
-            this.pop3PortCol});
+            this.pop3HostCol,
+            this.pop3PortCol,
+            this.sslCol});
             this.serversTable.Dock = System.Windows.Forms.DockStyle.Fill;
             this.serversTable.Location = new System.Drawing.Point(3, 3);
             this.serversTable.Name = "serversTable";
@@ -1443,29 +1449,31 @@
             this.serversTable.RowHeadersWidth = 51;
             this.serversTable.RowTemplate.Height = 24;
             this.serversTable.Size = new System.Drawing.Size(862, 484);
-            this.serversTable.TabIndex = 1;
+            this.serversTable.TabIndex = 9;
+            this.serversTable.TabStop = false;
             // 
-            // selectionCol
+            // selectedServerCol
             // 
-            this.selectionCol.Frozen = true;
-            this.selectionCol.HeaderText = "";
-            this.selectionCol.MinimumWidth = 25;
-            this.selectionCol.Name = "selectionCol";
-            this.selectionCol.Width = 25;
+            this.selectedServerCol.Frozen = true;
+            this.selectedServerCol.HeaderText = "";
+            this.selectedServerCol.MinimumWidth = 25;
+            this.selectedServerCol.Name = "selectedServerCol";
+            this.selectedServerCol.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.selectedServerCol.Width = 25;
             // 
-            // domenCol
+            // domainCol
             // 
-            this.domenCol.HeaderText = "Домен";
-            this.domenCol.MinimumWidth = 100;
-            this.domenCol.Name = "domenCol";
-            this.domenCol.Width = 125;
+            this.domainCol.HeaderText = "Домен";
+            this.domainCol.MinimumWidth = 100;
+            this.domainCol.Name = "domainCol";
+            this.domainCol.Width = 125;
             // 
-            // smtpServerCol
+            // smtpHostCol
             // 
-            this.smtpServerCol.HeaderText = "SMTP сервер";
-            this.smtpServerCol.MinimumWidth = 100;
-            this.smtpServerCol.Name = "smtpServerCol";
-            this.smtpServerCol.Width = 125;
+            this.smtpHostCol.HeaderText = "SMTP сервер";
+            this.smtpHostCol.MinimumWidth = 100;
+            this.smtpHostCol.Name = "smtpHostCol";
+            this.smtpHostCol.Width = 125;
             // 
             // smtpPortCol
             // 
@@ -1474,12 +1482,12 @@
             this.smtpPortCol.Name = "smtpPortCol";
             this.smtpPortCol.Width = 70;
             // 
-            // imapServerCol
+            // imapHostCol
             // 
-            this.imapServerCol.HeaderText = "IMAP сервер";
-            this.imapServerCol.MinimumWidth = 100;
-            this.imapServerCol.Name = "imapServerCol";
-            this.imapServerCol.Width = 125;
+            this.imapHostCol.HeaderText = "IMAP сервер";
+            this.imapHostCol.MinimumWidth = 100;
+            this.imapHostCol.Name = "imapHostCol";
+            this.imapHostCol.Width = 125;
             // 
             // imapPortCol
             // 
@@ -1488,12 +1496,12 @@
             this.imapPortCol.Name = "imapPortCol";
             this.imapPortCol.Width = 70;
             // 
-            // pop3ServerCol
+            // pop3HostCol
             // 
-            this.pop3ServerCol.HeaderText = "POP3 сервер";
-            this.pop3ServerCol.MinimumWidth = 100;
-            this.pop3ServerCol.Name = "pop3ServerCol";
-            this.pop3ServerCol.Width = 125;
+            this.pop3HostCol.HeaderText = "POP3 сервер";
+            this.pop3HostCol.MinimumWidth = 100;
+            this.pop3HostCol.Name = "pop3HostCol";
+            this.pop3HostCol.Width = 125;
             // 
             // pop3PortCol
             // 
@@ -1502,9 +1510,31 @@
             this.pop3PortCol.Name = "pop3PortCol";
             this.pop3PortCol.Width = 70;
             // 
+            // sslCol
+            // 
+            this.sslCol.HeaderText = "Ssl защита";
+            this.sslCol.MinimumWidth = 60;
+            this.sslCol.Name = "sslCol";
+            this.sslCol.ReadOnly = true;
+            this.sslCol.Width = 60;
+            // 
             // checkInputPrv
             // 
             this.checkInputPrv.ContainerControl = this;
+            // 
+            // updateBooksWorker
+            // 
+            this.updateBooksWorker.WorkerReportsProgress = true;
+            this.updateBooksWorker.WorkerSupportsCancellation = true;
+            this.updateBooksWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.updateBooksWorker_DoWork);
+            this.updateBooksWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.updateBooksWorker_RunWorkerCompleted);
+            // 
+            // updateServersWorker
+            // 
+            this.updateServersWorker.WorkerReportsProgress = true;
+            this.updateServersWorker.WorkerSupportsCancellation = true;
+            this.updateServersWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.updateServersWorker_DoWork);
+            this.updateServersWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.updateServersWorker_RunWorkerCompleted);
             // 
             // ClientForm
             // 
@@ -1571,15 +1601,7 @@
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.DataGridView serversTable;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.DataGridViewCheckBoxColumn selectionCol;
-        private System.Windows.Forms.DataGridViewTextBoxColumn domenCol;
-        private System.Windows.Forms.DataGridViewTextBoxColumn smtpServerCol;
-        private System.Windows.Forms.DataGridViewTextBoxColumn smtpPortCol;
-        private System.Windows.Forms.DataGridViewTextBoxColumn imapServerCol;
-        private System.Windows.Forms.DataGridViewTextBoxColumn imapPortCol;
-        private System.Windows.Forms.DataGridViewTextBoxColumn pop3ServerCol;
-        private System.Windows.Forms.DataGridViewTextBoxColumn pop3PortCol;
-        private System.Windows.Forms.TextBox domenTxt;
+        private System.Windows.Forms.TextBox domainTxt;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label6;
@@ -1588,11 +1610,11 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox pop3PortTxt;
-        private System.Windows.Forms.TextBox pop3ServerTxt;
+        private System.Windows.Forms.TextBox pop3HostTxt;
         private System.Windows.Forms.TextBox imapPortTxt;
-        private System.Windows.Forms.TextBox imapServerTxt;
+        private System.Windows.Forms.TextBox imapHostTxt;
         private System.Windows.Forms.TextBox smtpPortTxt;
-        private System.Windows.Forms.TextBox smtpServerTxt;
+        private System.Windows.Forms.TextBox smtpHostTxt;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Button removeServersBtn;
@@ -1646,14 +1668,6 @@
         private System.Windows.Forms.Button encryptMsgBtn;
         private System.Windows.Forms.Button keySignMsgBtn;
         private System.Windows.Forms.Button letterSendBtn;
-        private System.Windows.Forms.DataGridViewCheckBoxColumn selectedCol;
-        private System.Windows.Forms.DataGridViewTextBoxColumn emailCol;
-        private System.Windows.Forms.DataGridViewTextBoxColumn privateCol;
-        private System.Windows.Forms.DataGridViewTextBoxColumn publicCol;
-        private System.Windows.Forms.DataGridViewTextBoxColumn privateSignCol;
-        private System.Windows.Forms.DataGridViewTextBoxColumn publicSignCol;
-        private System.Windows.Forms.DataGridViewTextBoxColumn publicRemoteCol;
-        private System.Windows.Forms.DataGridViewTextBoxColumn publicSignRemoteCol;
         private System.Windows.Forms.ListView boxesList;
         private System.Windows.Forms.ColumnHeader columnHeader1;
         private System.Windows.Forms.TableLayoutPanel lettersTablePanel;
@@ -1676,5 +1690,24 @@
         private System.Windows.Forms.ListView lettersList;
         private System.Windows.Forms.Button detachLastFileBtn;
         private System.Windows.Forms.ToolStripMenuItem updateLettersBtn;
+        private System.ComponentModel.BackgroundWorker updateBooksWorker;
+        private System.ComponentModel.BackgroundWorker updateServersWorker;
+        private System.Windows.Forms.DataGridViewCheckBoxColumn selectedKeyCol;
+        private System.Windows.Forms.DataGridViewTextBoxColumn emailCol;
+        private System.Windows.Forms.DataGridViewTextBoxColumn privateCol;
+        private System.Windows.Forms.DataGridViewTextBoxColumn publicCol;
+        private System.Windows.Forms.DataGridViewTextBoxColumn privateSignCol;
+        private System.Windows.Forms.DataGridViewTextBoxColumn publicSignCol;
+        private System.Windows.Forms.DataGridViewTextBoxColumn publicRemoteCol;
+        private System.Windows.Forms.DataGridViewTextBoxColumn publicSignRemoteCol;
+        private System.Windows.Forms.DataGridViewCheckBoxColumn selectedServerCol;
+        private System.Windows.Forms.DataGridViewTextBoxColumn domainCol;
+        private System.Windows.Forms.DataGridViewTextBoxColumn smtpHostCol;
+        private System.Windows.Forms.DataGridViewTextBoxColumn smtpPortCol;
+        private System.Windows.Forms.DataGridViewTextBoxColumn imapHostCol;
+        private System.Windows.Forms.DataGridViewTextBoxColumn imapPortCol;
+        private System.Windows.Forms.DataGridViewTextBoxColumn pop3HostCol;
+        private System.Windows.Forms.DataGridViewTextBoxColumn pop3PortCol;
+        private System.Windows.Forms.DataGridViewCheckBoxColumn sslCol;
     }
 }

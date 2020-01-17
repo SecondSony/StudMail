@@ -42,11 +42,11 @@ namespace MailClient.DB
                     while (reader.Read())
                     {
                         var letter = new LetterInfo();
-
                         letter.Id = reader.GetInt32(0);
                         letter.FolderId = reader.GetInt32(1);
                         letter.Uid = reader.GetInt32(2);
                         letter.MsgBase64 = reader.GetString(3).Trim(' ');
+
                         letters.Add(letter);
                     }
                 }
@@ -85,16 +85,15 @@ namespace MailClient.DB
         // TODO:
         public static bool IsLetterExists(SQLiteConnection connection, long folderId, long uid)
         {
-            var reqStr = $"SELECT COUNT(letters.uid) FROM letters WHERE letters.folder_id='{folderId}' " +
+            var reqStr = $"SELECT letters.uid FROM letters WHERE letters.folder_id='{folderId}' " +
                          $"AND letters.uid='{uid}'";
 
             if (connection.State == ConnectionState.Open)
             {
                 using (var cmd = new SQLiteCommand(reqStr, connection))
+                using (var reader = cmd.ExecuteReader())
                 {
-                    var rowCount = (int) cmd.ExecuteScalar();
-
-                    return rowCount > 0;
+                    return reader.HasRows;
                 }
             }
 

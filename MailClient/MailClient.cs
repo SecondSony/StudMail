@@ -33,7 +33,7 @@ namespace MailClient
 
         ~MailClient()
         {
-
+            threadCheckNetwork = null;
         }
 
         private static void checkNetwork()

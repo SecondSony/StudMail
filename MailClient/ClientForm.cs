@@ -1,6 +1,8 @@
-﻿using MailClient.Helpers;
+﻿using MailClient.DB;
+using MailClient.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
@@ -22,13 +24,17 @@ namespace MailClient
             ServersTab = 3
         }
 
-        public MailClient StudMail;
+        private MailClient StudMail;
+        private ObservableCollection<FolderInfo> Folders;
+        private ObservableCollection<LetterInfo> Letters;
 
         public ClientForm(UserInfo user)
         {
             InitializeComponent();
 
             StudMail = new MailClient(user);
+            Folders = new ObservableCollection<FolderInfo>();
+            Letters = new ObservableCollection<LetterInfo>();
 
             boxesList.Items.Add("asdgf");
             boxesList.Items.Add("asdgf");
@@ -38,6 +44,55 @@ namespace MailClient
             lettersList.Items.Add("qwerty");
 
             InitFont();
+            updateBooksWorker.RunWorkerAsync();
+            updateServersWorker.RunWorkerAsync();
+        }
+
+        private void UpdateBoxes()
+        {
+
+        }
+
+        private void UpdateLetters()
+        {
+
+        }
+
+        private void UpdateBooks(List<RSABookInfo> books)
+        {
+            keysTable.Rows.Clear();
+
+            foreach (var item in books)
+            {
+                var index = keysTable.Rows.Add();
+
+                keysTable.Rows[index].Cells["emailCol"].Value = item.Email;
+                keysTable.Rows[index].Cells["privateCol"].Value = item.OwnPrivate;
+                keysTable.Rows[index].Cells["publicCol"].Value = item.OwnPublic;
+                keysTable.Rows[index].Cells["privateECPCol"].Value = item.OwnPrivateECP;
+                keysTable.Rows[index].Cells["publicECPCol"].Value = item.OwnPublicECP;
+                keysTable.Rows[index].Cells["publicRemoteCol"].Value = item.EmailPublic;
+                keysTable.Rows[index].Cells["publicSignRemoteCol"].Value = item.EmailPublicECP;
+            }
+        }
+
+        private void UpdateServers(List<ServerInfo> servers)
+        {
+            serversTable.Rows.Clear();
+
+            foreach (var item in servers)
+            {
+                var index = serversTable.Rows.Add();
+
+                serversTable.Rows[index].Cells["domainCol"].Value = item.Domain;
+                serversTable.Rows[index].Cells["smtpHostCol"].Value = item.SmtpHost;
+                serversTable.Rows[index].Cells["smtpPortCol"].Value = item.SmtpPort;
+                serversTable.Rows[index].Cells["imapHostCol"].Value = item.ImapHost;
+                serversTable.Rows[index].Cells["imapPortCol"].Value = item.ImapPort;
+                serversTable.Rows[index].Cells["pop3HostCol"].Value = item.Pop3Host;
+                serversTable.Rows[index].Cells["pop3PortCol"].Value = item.Pop3Port;
+                serversTable.Rows[index].Cells["sslCol"].Value = item.IsSsl;
+            }
         }
 
         private void InitFont()
@@ -89,6 +144,12 @@ namespace MailClient
                     break;
             }
         }
+
+        #region Обработка вкладки чтения писем
+
+
+
+        #endregion
 
         #region Обработка вкладки отправки сообщений
 
@@ -256,6 +317,15 @@ namespace MailClient
             checkInputPrv.Clear();
         }
 
+        private void updateBooksWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            e.Result = DBRSABooks.GetBooks(DBConnection.Connection, (int) StudMail.CurrentUser.Id);
+        }
+
+        private void updateBooksWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            UpdateBooks((List<RSABookInfo>) e.Result);
+        }
 
         #endregion
 
@@ -263,12 +333,93 @@ namespace MailClient
 
         private void addServerBtn_Click(object sender, EventArgs e)
         {
+            var domain = domainTxt.Text.Trim(' ');
+            var smtpHost = smtpHostTxt.Text.Trim(' ');
+            var smtpPort = smtpPortTxt.Text.Trim(' ');
+            var imapHost = imapHostTxt.Text.Trim(' ');
+            var imapPort = imapPortTxt.Text.Trim(' ');
+            var pop3Host = pop3HostTxt.Text.Trim(' ');
+            var pop3Port = pop3PortTxt.Text.Trim(' ');
+            ServerInfo newServer;
+            int smtp;
+            int imap;
+            int pop3;
 
+            if (string.IsNullOrEmpty(domain))
+            {
+                checkInputPrv.SetError(domainTxt, "Заполните данное поле");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(smtpHost))
+            {
+                checkInputPrv.SetError(smtpHostTxt, "Заполните данное поле");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(smtpPort) | !int.TryParse(smtpPort, out smtp))
+            {
+                checkInputPrv.SetError(smtpPortTxt, "Заполните данное поле корректно");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(imapHost))
+            {
+                checkInputPrv.SetError(imapHostTxt, "Заполните данное поле");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(imapPort) | !int.TryParse(imapPort, out imap))
+            {
+                checkInputPrv.SetError(imapPortTxt, "Заполните данное поле корректно");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(pop3Host))
+            {
+                checkInputPrv.SetError(pop3HostTxt, "Заполните данное поле");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(pop3Port) | !int.TryParse(pop3Port, out pop3))
+            {
+                checkInputPrv.SetError(pop3PortTxt, "Заполните данное поле корректно");
+                return;
+            }
+
+            newServer = new ServerInfo()
+            {
+                Domain = domain,
+                SmtpHost = smtpHost,
+                SmtpPort = smtp,
+                ImapHost = imapHost,
+                ImapPort = imap,
+                Pop3Host = pop3Host,
+                Pop3Port = pop3,
+                IsSsl = sslCheck.Checked
+            };
+
+            if (!DBServers.Add(DBConnection.Connection, newServer))
+            {
+                checkInputPrv.SetError(domainTxt, "Сервер уже существует");
+                return;
+            }
+
+            UpdateServers(DBServers.GetServers(DBConnection.Connection));
         }
 
         private void removeServersBtn_Click(object sender, EventArgs e)
         {
+            for (int i = 0; i < serversTable.Rows.Count; i++)
+            {
+                var selected = (bool) serversTable.Rows[i].Cells["selectedServerCol"].EditedFormattedValue;
+                var domain = (string) serversTable.Rows[i].Cells["domainCol"].Value;
 
+                if (!selected || !DBServers.Remove(DBConnection.Connection, domain))
+                    continue;
+            }
+
+            UpdateServers(DBServers.GetServers(DBConnection.Connection));
         }
 
         private void domenTxt_Enter(object sender, EventArgs e)
@@ -304,6 +455,16 @@ namespace MailClient
         private void pop3PortTxt_Enter(object sender, EventArgs e)
         {
             checkInputPrv.Clear();
+        }
+
+        private void updateServersWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            e.Result = DBServers.GetServers(DBConnection.Connection);
+        }
+
+        private void updateServersWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            UpdateServers((List<ServerInfo>) e.Result);
         }
 
         #endregion

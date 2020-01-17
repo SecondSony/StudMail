@@ -74,8 +74,7 @@ namespace MailClient.DB
                 using (var cmd = new SQLiteCommand(reqStr, connection))
                 using (var reader = cmd.ExecuteReader())
                 {
-                    if (reader.Read()) 
-                        return true;
+                    return reader.HasRows;
                 }
             }
 
