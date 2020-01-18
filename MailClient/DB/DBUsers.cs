@@ -56,6 +56,9 @@ namespace MailClient.DB
                     user = GetLoginAccount(connection, email, password, serverId);
                 }
 
+                user.Email = email;
+                user.Password = password;
+
                 return user;
             }
             catch (SQLiteException)
@@ -84,7 +87,7 @@ namespace MailClient.DB
         public static UserInfo GetLoginAccount(SQLiteConnection connection, string email, string password, int serverId)
         {
             var reqStr = $"SELECT * FROM users WHERE server_id='{serverId}' AND email='{email}' " +
-                         $"AND password='{UserSHA1.ComputeHashSHA1(password)}'";
+                         $"AND password='{UserSHA1.ComputeHash(password)}'";
 
             if (connection.State == ConnectionState.Open)
             {
@@ -107,7 +110,7 @@ namespace MailClient.DB
 
         public static bool AddAccount(SQLiteConnection connection, string email, string password, int serverId)
         {
-            string reqStr = $"INSERT into users (email,password,server_id) VALUES ('{email}','{UserSHA1.ComputeHashSHA1(password)}','{serverId}')";
+            string reqStr = $"INSERT into users (email,password,server_id) VALUES ('{email}','{UserSHA1.ComputeHash(password)}','{serverId}')";
 
             if (!IsAccountExists(connection, email, serverId))
             {
@@ -139,7 +142,7 @@ namespace MailClient.DB
 
         public static bool UpdateAccountData(SQLiteConnection connection, string email, string password, int serverId)
         {
-            var reqStr = $"UPDATE users SET password='{UserSHA1.ComputeHashSHA1(password)}' WHERE email='{email}'";
+            var reqStr = $"UPDATE users SET password='{UserSHA1.ComputeHash(password)}' WHERE email='{email}'";
 
             if (IsAccountExists(connection, email, serverId))
             {

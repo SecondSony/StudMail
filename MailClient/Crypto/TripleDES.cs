@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Security.Cryptography;
 
 namespace MailClient.Crypto
 {
@@ -14,14 +12,78 @@ namespace MailClient.Crypto
         private const int keyRound = 12;
         private string[] blocks;
 
-        public string Encrypt(string text, ref string key)
+        /// <summary>
+        /// Генерирует ключ и вектор
+        /// </summary>
+        /// <returns></returns>
+        public static List<byte[]> GenKey()
         {
-            return "";
+            using (var tdes = System.Security.Cryptography.TripleDES.Create())
+            {
+                var list = new List<byte[]>();
+
+                tdes.GenerateKey();
+                tdes.GenerateIV();
+
+                list.Add(tdes.Key);
+                list.Add(tdes.IV);
+
+                return list;
+            }
         }
 
-        public string Decrypt(string text, ref string key)
+        public static byte[] Encrypt(string text, byte[] key, byte[] iv)
         {
-            return "";
+            byte[] encrypted;
+
+            using (var tdes = System.Security.Cryptography.TripleDES.Create())
+            {
+                tdes.Key = key;
+                tdes.IV = iv;
+
+                ICryptoTransform encryptor = tdes.CreateEncryptor(tdes.Key, tdes.IV);
+
+                using (var mStream = new MemoryStream())
+                {
+                    using (var cStream = new CryptoStream(mStream, encryptor, CryptoStreamMode.Write))
+                    {
+                        using (var writer = new StreamWriter(cStream))
+                        {
+                            writer.Write(text);
+                        }
+                    }
+
+                    encrypted = mStream.ToArray();
+                }
+            }
+
+            return encrypted;
+        }
+
+        public static string Decrypt(byte[] msgHash, byte[] key, byte[] iv)
+        {
+            string plaintext = "";
+
+            using (var tdes = System.Security.Cryptography.TripleDES.Create())
+            {
+                tdes.Key = key;
+                tdes.IV = iv;
+
+                ICryptoTransform encryptor = tdes.CreateEncryptor(tdes.Key, tdes.IV);
+
+                using (var mStream = new MemoryStream())
+                {
+                    using (var cStream = new CryptoStream(mStream, encryptor, CryptoStreamMode.Read))
+                    {
+                        using (var reader = new StreamReader(cStream))
+                        {
+                            plaintext = reader.ReadToEnd();
+                        }
+                    }
+                }
+            }
+
+            return plaintext;
         }
 
 

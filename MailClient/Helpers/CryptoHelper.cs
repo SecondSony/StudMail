@@ -19,4 +19,10 @@ namespace MailClient.Helpers
         public string PrivateKey { get; set; }
         public string PublicKey { get; set; }
     }
+
+    public class DSAKeyPair
+    {
+        public byte[] PrivateKey { get; set; }
+        public byte[] PublicKey { get; set; }
+    }
 }

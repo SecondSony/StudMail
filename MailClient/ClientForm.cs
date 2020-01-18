@@ -1,15 +1,16 @@
-﻿using MailClient.DB;
+﻿using MailClient.Crypto;
+using MailClient.DB;
 using MailClient.Helpers;
+using MailKit;
+using MimeKit;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Drawing.Text;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace MailClient
@@ -24,33 +25,51 @@ namespace MailClient
             ServersTab = 3
         }
 
+        enum FolderState
+        {
+            NONE = -1,
+            INBOX = 0,
+            SENT = 1,
+            DRAFT = 2,
+            JUNK = 3,
+            TRASH = 4,
+        }
+
         private MailClient StudMail;
-        private ObservableCollection<FolderInfo> Folders;
-        private ObservableCollection<LetterInfo> Letters;
+        private List<FolderInfo> Folders;
+        private List<string> currentPaths = new List<string>();
+        private bool isEncryptMsg = false;
+        private FolderState CurrentFolder;
 
         public ClientForm(UserInfo user)
         {
             InitializeComponent();
 
             StudMail = new MailClient(user);
-            Folders = new ObservableCollection<FolderInfo>();
-            Letters = new ObservableCollection<LetterInfo>();
+            UpdateFolders();
 
-            boxesList.Items.Add("asdgf");
-            boxesList.Items.Add("asdgf");
-            boxesList.Items.Add("asdgf");
-            lettersList.Items.Add("qwerty");
-            lettersList.Items.Add("qwerty");
-            lettersList.Items.Add("qwerty");
+            StudMail.GetFolders();
 
             InitFont();
             updateBooksWorker.RunWorkerAsync();
             updateServersWorker.RunWorkerAsync();
         }
 
-        private void UpdateBoxes()
+        private void UpdateFolders()
         {
+            var list = new List<string>();
+            
+            if (StudMail.GetFolders())
+                list = StudMail.Folders.Select(f => f.FullName).ToList();
 
+            DBFolders.SyncFolders(DBConnection.Connection, list, StudMail.UserId);
+            StudMail.UserFolders = DBFolders.GetFolders(DBConnection.Connection, StudMail.UserId);
+            boxesList.Items.Clear();
+
+            foreach (var folder in StudMail.UserFolders)
+            {
+                boxesList.Items.Add(folder.Name);
+            }
         }
 
         private void UpdateLetters()
@@ -69,8 +88,8 @@ namespace MailClient
                 keysTable.Rows[index].Cells["emailCol"].Value = item.Email;
                 keysTable.Rows[index].Cells["privateCol"].Value = item.OwnPrivate;
                 keysTable.Rows[index].Cells["publicCol"].Value = item.OwnPublic;
-                keysTable.Rows[index].Cells["privateECPCol"].Value = item.OwnPrivateECP;
-                keysTable.Rows[index].Cells["publicECPCol"].Value = item.OwnPublicECP;
+                keysTable.Rows[index].Cells["privateSignCol"].Value = item.OwnPrivateECP;
+                keysTable.Rows[index].Cells["publicSignCol"].Value = item.OwnPublicECP;
                 keysTable.Rows[index].Cells["publicRemoteCol"].Value = item.EmailPublic;
                 keysTable.Rows[index].Cells["publicSignRemoteCol"].Value = item.EmailPublicECP;
             }
@@ -125,6 +144,7 @@ namespace MailClient
             fontSizeBtn.Value = 12;
             msgSendTxt.Text = "";
             attachFilesList.Items.Clear();
+            currentPaths.Clear();
         }
 
         private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
@@ -234,7 +254,19 @@ namespace MailClient
 
         private void attachFilesBtn_Click(object sender, EventArgs e)
         {
+            var ofd = new OpenFileDialog();
 
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                if (currentPaths.Contains(ofd.FileName))
+                {
+                    MessageBox.Show("Данный файл уже загружен");
+                    return;
+                }
+
+                attachFilesList.Items.Add(Path.GetFileName(ofd.FileName));
+                currentPaths.Add(ofd.FileName);
+            }
         }
 
         private void detachLastFileBtn_Click(object sender, EventArgs e)
@@ -245,7 +277,9 @@ namespace MailClient
 
         private void encryptMsgBtn_Click(object sender, EventArgs e)
         {
-
+            var msg = !isEncryptMsg ? "Не шифровать сообщение" : "Зашифровать сообщение";
+            tooltipHelper.SetToolTip(encryptMsgBtn, msg);
+            isEncryptMsg = !isEncryptMsg;
         }
 
         private void keySignMsgBtn_Click(object sender, EventArgs e)
@@ -253,9 +287,103 @@ namespace MailClient
 
         }
 
+        // TODO:
         private void letterSendBtn_Click(object sender, EventArgs e)
         {
+            lock (MailClient.ObjLock)
+            {
+                if (MailClient.CurrentNetwork == NetworkStatus.Disconnected)
+                {
+                    MessageBox.Show("Отсутствует интернет! Отправка письма невозможна!");
+                    return;
+                }
+            }
 
+            // Зашифровать текст сообщения TripleDES
+            // Получить ключ и вектор сообщения TripleDES
+            // Зашифровать ключ при помощи RSA и получить ключи
+            // Получить ЭЦП и ключи
+            // Сформировать конечную строку - зашифрованный текст&зашифрованный ключ&вектор&ЭЦП
+            // Сформировать сообщение MimeMessage
+            // Отправить сообщение на сервер
+            // Сохранить сообщение в БД в зашифрованном виде
+
+            var msg = new MimeMessage();
+            var to = receiverEmailTxt.Text.Trim();
+            var subject = themeSendTxt.Text.Trim();
+            var body = msgSendTxt.Text.Trim();
+            var receivers = to.Split(';');
+            var userId = StudMail.UserId;
+            var books = DBRSABooks.GetBooks(DBConnection.Connection, userId);
+
+            if (string.IsNullOrEmpty(to))
+            {
+                checkInputPrv.SetError(receiverEmailTxt, "Заполните данное поле");
+                return;
+            }
+
+            try
+            {
+                msg.From.Add(new MailboxAddress(StudMail.CurrentUser.Email));
+
+                foreach (var item in receivers) msg.To.Add(new MailboxAddress(item));
+
+                msg.Subject = subject;
+
+                var found = false;
+
+                // Находим для каждого адресата свой ключ
+                foreach (var receiver in msg.To)
+                {
+                    if (!isEncryptMsg)
+                    {
+                        var mailMsg = MailHelper.GenMsg(msg, body, currentPaths);
+
+                        if (StudMail.SendLetter(mailMsg))
+                        {
+                            MessageBox.Show($"Сообщение отправлено адресату: {receiver.ToString()}");
+                        }
+                        else
+                        {
+                            MessageBox.Show($"Не удалось отправить сообщение адресату: {receiver.ToString()}");
+                        }
+                    }
+                    else
+                    {
+                        foreach (var book in books)
+                        {
+                            if (book.Email == receiver.ToString())
+                            {
+                                var mailMsg = MailHelper.GenEncryptedMsg(msg, body, currentPaths, book);
+
+                                if (StudMail.SendLetter(mailMsg))
+                                {
+                                    MessageBox.Show($"Сообщение отправлено адресату: {receiver.ToString()}");
+                                }
+                                else
+                                {
+                                    MessageBox.Show($"Не удалось отправить сообщение адресату: {receiver.ToString()}");
+                                }
+
+                                // Нужно ещё записать в БД в зашифрованном виде, но не хватает uid
+
+                                found = true;
+                                break;
+                            }
+                        }
+
+                        if (!found)
+                        {
+                            MessageBox.Show($"{receiver.ToString()} не имеет публичного ключа");
+                        }
+                    }
+                }
+
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show("Произошла непредвиденная ошибка\n" + err.Message);
+            }
         }
 
         #endregion
@@ -264,22 +392,104 @@ namespace MailClient
 
         private void addKeysBtn_Click(object sender, EventArgs e)
         {
+            var email = keysEmailTxt.Text.Trim(' ');
+            var privateKey = keysPrivateTxt.Text.Trim(' ');
+            var publicKey = keysPublicTxt.Text.Trim(' ');
+            var privateECPKey = keysPrivateSignTxt.Text.Trim(' ');
+            var publicECPKey = keysPublicSignTxt.Text.Trim(' ');
+            var remoteKey = keysRemoteTxt.Text.Trim(' ');
+            var remoteECPKey = keysRemoteSignTxt.Text.Trim(' ');
+            RSABookInfo book;
 
+            if (string.IsNullOrEmpty(email))
+            {
+                checkInputPrv.SetError(keysEmailTxt, "Заполните данное поле");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(privateKey))
+            {
+                checkInputPrv.SetError(keysPrivateTxt, "Заполните данное поле");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(publicKey))
+            {
+                checkInputPrv.SetError(keysPublicTxt, "Заполните данное поле");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(privateECPKey))
+            {
+                checkInputPrv.SetError(keysPrivateSignTxt, "Заполните данное поле");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(publicECPKey))
+            {
+                checkInputPrv.SetError(keysPublicSignTxt, "Заполните данное поле");
+                return;
+            }
+
+            /*if (string.IsNullOrEmpty(remoteKey))
+            {
+                checkInputPrv.SetError(keysRemoteTxt, "Заполните данное поле");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(remoteECPKey))
+            {
+                checkInputPrv.SetError(keysRemoteSignTxt, "Заполните данное поле");
+                return;
+            }*/
+
+            book = new RSABookInfo()
+            {
+                UserId = StudMail.UserId.ToString(),
+                Email = email,
+                OwnPrivate = privateKey,
+                OwnPublic = publicKey,
+                OwnPrivateECP = privateECPKey,
+                OwnPublicECP = publicECPKey,
+                EmailPublic = remoteKey,
+                EmailPublicECP = remoteECPKey
+            };
+
+            if (!DBRSABooks.Add(DBConnection.Connection, book))
+            {
+                checkInputPrv.SetError(keysEmailTxt, "Данная запись уже существует");
+                return;
+            }
+
+            updateBooksWorker.RunWorkerAsync();
         }
 
         private void removeKeysBtn_Click(object sender, EventArgs e)
         {
+            for (int i = 0; i < keysTable.Rows.Count; i++)
+            {
+                var selected = (bool) keysTable.Rows[i].Cells["selectedKeyCol"].EditedFormattedValue;
+                var email = (string) keysTable.Rows[i].Cells["emailCol"].Value;
+                var userId = StudMail.UserId;
 
+                if (selected) DBRSABooks.Remove(DBConnection.Connection, email, userId);
+            }
+
+            updateBooksWorker.RunWorkerAsync();
         }
 
         private void genKeyBtn_Click(object sender, EventArgs e)
         {
-
+            var keys = RSA.GenKeys(RSAKeySize.Key2048);
+            keysPrivateTxt.Text = keys.PrivateKey;
+            keysPublicTxt.Text = keys.PublicKey;
         }
 
         private void genKeySignBtn_Click(object sender, EventArgs e)
         {
-
+            var keys = DSA.GenKeyPair();
+            keysPrivateSignTxt.Text = Convert.ToBase64String(keys.PrivateKey);
+            keysPublicSignTxt.Text = Convert.ToBase64String(keys.PublicKey);
         }
 
         private void keysEmailTxt_Enter(object sender, EventArgs e)
@@ -319,7 +529,7 @@ namespace MailClient
 
         private void updateBooksWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            e.Result = DBRSABooks.GetBooks(DBConnection.Connection, (int) StudMail.CurrentUser.Id);
+            e.Result = DBRSABooks.GetBooks(DBConnection.Connection, StudMail.UserId);
         }
 
         private void updateBooksWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -405,7 +615,7 @@ namespace MailClient
                 return;
             }
 
-            UpdateServers(DBServers.GetServers(DBConnection.Connection));
+            updateServersWorker.RunWorkerAsync();
         }
 
         private void removeServersBtn_Click(object sender, EventArgs e)
@@ -415,11 +625,10 @@ namespace MailClient
                 var selected = (bool) serversTable.Rows[i].Cells["selectedServerCol"].EditedFormattedValue;
                 var domain = (string) serversTable.Rows[i].Cells["domainCol"].Value;
 
-                if (!selected || !DBServers.Remove(DBConnection.Connection, domain))
-                    continue;
+                if (selected) DBServers.Remove(DBConnection.Connection, domain);
             }
 
-            UpdateServers(DBServers.GetServers(DBConnection.Connection));
+            updateServersWorker.RunWorkerAsync();
         }
 
         private void domenTxt_Enter(object sender, EventArgs e)

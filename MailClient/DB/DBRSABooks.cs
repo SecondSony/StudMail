@@ -44,21 +44,32 @@ namespace MailClient.DB
             return books;
         }
 
-        // TODO:
-        public static bool IsBookExists(SQLiteConnection connection)
+        public static bool IsBookExists(SQLiteConnection connection, string email, int userId)
         {
+            var reqStr = $"SELECT user_id, email FROM RSABOOKS WHERE user_id = '{userId}' " +
+                         $"AND email = '{email}' ";
+
+            if (connection.State == ConnectionState.Open)
+            {
+                using (var cmd = new SQLiteCommand(reqStr, connection))
+                using (var reader = cmd.ExecuteReader())
+                {
+                    return reader.HasRows;
+                }
+            }
+
             return false;
         }
 
         public static bool Add(SQLiteConnection connection, RSABookInfo newItem)
         {
             var reqStr = $"INSERT INTO RSABOOKS (user_id, email, own_private_key, own_public_key, " +
-                         $"own_private_key_ecp, own_public_key_ecp, email_public_key, " +
+                         $"own_priv_key_ecp, own_pub_key_ecp, email_public_key, " +
                          $"email_public_key_ecp) VALUES('{newItem.UserId}', '{newItem.Email}', " +
                          $"'{newItem.OwnPrivate}', '{newItem.OwnPublic}', '{newItem.OwnPrivateECP}', " +
                          $"'{newItem.OwnPublicECP}', '{newItem.EmailPublic}', '{newItem.EmailPublicECP}')";
 
-            if (!IsBookExists(connection))
+            if (!IsBookExists(connection, newItem.Email, int.Parse(newItem.UserId)))
             {
                 using (var cmd = new SQLiteCommand(reqStr, connection))
                 {
@@ -70,11 +81,11 @@ namespace MailClient.DB
             return false;
         }
 
-        public static bool Remove(SQLiteConnection connection, RSABookInfo rmvItem)
+        public static bool Remove(SQLiteConnection connection, string email, int userId)
         {
-            var reqStr = $"DELETE FROM RSABOOKS WHERE email='{rmvItem.Email}' AND user_id='{rmvItem.UserId}'";
+            var reqStr = $"DELETE FROM RSABOOKS WHERE email='{email}' AND user_id='{userId}'";
 
-            if (IsBookExists(connection))
+            if (connection.State == ConnectionState.Open)
             {
                 using (var cmd = new SQLiteCommand(reqStr, connection))
                 {

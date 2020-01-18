@@ -1,34 +1,49 @@
 ﻿using MailClient.DB;
 using MailClient.Helpers;
+using MailKit;
+using MailKit.Net.Imap;
+using MailKit.Net.Smtp;
+using MimeKit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.NetworkInformation;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace MailClient
 {
     public class MailClient
     {
-        public string CurrentFolder;
-        public string Folder;
+        public SpecialFolder CurrentFolder;
         public UserInfo CurrentUser;
+        public MimeMessage CurrentReadMsg;
+        public IList<IMailFolder> Folders;
         public static NetworkStatus CurrentNetwork;
+        public static object ObjLock;
         private Thread threadCheckNetwork;
-        private static object lockObj;
+
+        public int UserId => (int) CurrentUser.Id;
+
+        public List<FolderInfo> UserFolders
+        {
+            get => CurrentUser.Folders;
+            set => CurrentUser.Folders = value;
+        }
 
         public MailClient(UserInfo user)
         {
-            CurrentFolder = "INBOX";
+            var domain = AuthHelper.GetDomain(user.Email);
+            CurrentFolder = SpecialFolder.All;
             CurrentUser = user;
-            lockObj = new object();
-            Folder = "";
+            CurrentUser.Server = DBServers.GetServerInfo(DBConnection.Connection, domain);
+            CurrentUser.RSABooks = DBRSABooks.GetBooks(DBConnection.Connection, (int) user.Id);
+
+            ObjLock = new object();
             CurrentNetwork = NetworkStatus.Disconnected;
             threadCheckNetwork = new Thread(checkNetwork);
             threadCheckNetwork.Name = "Проверка соединения интернета";
             threadCheckNetwork.Start();
+
         }
 
         ~MailClient()
@@ -47,7 +62,7 @@ namespace MailClient
                     
                     if (pingReply.Status.ToString().Equals("Success"))
                     {
-                        lock (lockObj)
+                        lock (ObjLock)
                         {
                             CurrentNetwork = NetworkStatus.Connected;
                         }
@@ -55,13 +70,13 @@ namespace MailClient
                 }
                 catch (Exception)
                 {
-                    lock (lockObj)
+                    lock (ObjLock)
                     {
                         CurrentNetwork = NetworkStatus.Disconnected;
                     }
                 }
                 
-                Thread.Sleep(10000);
+                Thread.Sleep(5000);
             }
         }
 
@@ -70,9 +85,31 @@ namespace MailClient
 
         }
 
-        public List<FolderInfo> GetFolders()
+        public bool GetFolders()
         {
-            return null;
+            try
+            {
+                var domain = AuthHelper.GetDomain(CurrentUser.Email);
+                var server = DBServers.GetServerInfo(DBConnection.Connection, domain);
+                var list = new List<FolderInfo>();
+
+                using (var client = new ImapClient())
+                {
+                    client.ServerCertificateValidationCallback = (s, c, h, ex) => true;
+                    client.Connect(server.ImapHost, (int) server.ImapPort, server.IsSsl);
+                    client.Authenticate(CurrentUser.Email, CurrentUser.Password);
+
+                    var inbox = client.Inbox;
+                    Folders = client.GetFolders(client.PersonalNamespaces.First());
+
+                    client.Disconnect(true);
+                    return true;
+                }
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
         public List<LetterInfo> GetLetters()
@@ -85,9 +122,28 @@ namespace MailClient
             return null;
         }
 
-        public bool SendLetter()
+        public bool SendLetter(MimeMessage msg)
         {
-            return false;
+            try
+            {
+                var domain = AuthHelper.GetDomain(CurrentUser.Email);
+                var server = DBServers.GetServerInfo(DBConnection.Connection, domain);
+                
+                using (var client = new SmtpClient())
+                {
+                    client.ServerCertificateValidationCallback = (s, c, h, ex) => true;
+                    client.Connect(server.SmtpHost, (int) server.SmtpPort, server.IsSsl);
+                    client.Authenticate(CurrentUser.Email, CurrentUser.Password);
+                    client.Send(msg);
+                    client.Disconnect(true);
+                }
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
     }
 }
