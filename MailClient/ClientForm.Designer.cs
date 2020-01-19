@@ -30,8 +30,6 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ClientForm));
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.updateLettersBtn = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.lettersPage = new System.Windows.Forms.TabPage();
             this.msgLetterPanel = new System.Windows.Forms.Panel();
@@ -148,7 +146,8 @@
             this.tooltipHelper = new System.Windows.Forms.ToolTip(this.components);
             this.updateBooksWorker = new System.ComponentModel.BackgroundWorker();
             this.updateServersWorker = new System.ComponentModel.BackgroundWorker();
-            this.menuStrip1.SuspendLayout();
+            this.lettersStatus = new System.Windows.Forms.StatusStrip();
+            this.lettersStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.tabControl1.SuspendLayout();
             this.lettersPage.SuspendLayout();
             this.msgLetterPanel.SuspendLayout();
@@ -175,24 +174,8 @@
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.serversTable)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.checkInputPrv)).BeginInit();
+            this.lettersStatus.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // menuStrip1
-            // 
-            this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.updateLettersBtn});
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1182, 28);
-            this.menuStrip1.TabIndex = 0;
-            this.menuStrip1.Text = "menuStrip1";
-            // 
-            // updateLettersBtn
-            // 
-            this.updateLettersBtn.Name = "updateLettersBtn";
-            this.updateLettersBtn.Size = new System.Drawing.Size(92, 24);
-            this.updateLettersBtn.Text = "Обновить";
             // 
             // tabControl1
             // 
@@ -201,10 +184,10 @@
             this.tabControl1.Controls.Add(this.keysPage);
             this.tabControl1.Controls.Add(this.serversPage);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl1.Location = new System.Drawing.Point(0, 28);
+            this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(1182, 525);
+            this.tabControl1.Size = new System.Drawing.Size(1182, 553);
             this.tabControl1.TabIndex = 1;
             this.tabControl1.SelectedIndexChanged += new System.EventHandler(this.tabControl1_SelectedIndexChanged);
             // 
@@ -213,10 +196,11 @@
             this.lettersPage.Controls.Add(this.msgLetterPanel);
             this.lettersPage.Controls.Add(this.lettersTablePanel);
             this.lettersPage.Controls.Add(this.boxesList);
+            this.lettersPage.Controls.Add(this.lettersStatus);
             this.lettersPage.Location = new System.Drawing.Point(4, 25);
             this.lettersPage.Name = "lettersPage";
             this.lettersPage.Padding = new System.Windows.Forms.Padding(3);
-            this.lettersPage.Size = new System.Drawing.Size(1174, 496);
+            this.lettersPage.Size = new System.Drawing.Size(1174, 524);
             this.lettersPage.TabIndex = 0;
             this.lettersPage.Text = "Письма";
             this.lettersPage.UseVisualStyleBackColor = true;
@@ -229,7 +213,7 @@
             this.msgLetterPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.msgLetterPanel.Location = new System.Drawing.Point(453, 3);
             this.msgLetterPanel.Name = "msgLetterPanel";
-            this.msgLetterPanel.Size = new System.Drawing.Size(718, 490);
+            this.msgLetterPanel.Size = new System.Drawing.Size(718, 492);
             this.msgLetterPanel.TabIndex = 5;
             // 
             // letterReadTablePanel
@@ -246,7 +230,7 @@
             this.letterReadTablePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.letterReadTablePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 60F));
             this.letterReadTablePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 35F));
-            this.letterReadTablePanel.Size = new System.Drawing.Size(718, 430);
+            this.letterReadTablePanel.Size = new System.Drawing.Size(718, 432);
             this.letterReadTablePanel.TabIndex = 5;
             // 
             // letterReadOptionTablePanel
@@ -259,7 +243,7 @@
             this.letterReadOptionTablePanel.Controls.Add(this.decryptMsgBtn, 1, 0);
             this.letterReadOptionTablePanel.Controls.Add(this.detachFilesBtn, 0, 0);
             this.letterReadOptionTablePanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.letterReadOptionTablePanel.Location = new System.Drawing.Point(1, 396);
+            this.letterReadOptionTablePanel.Location = new System.Drawing.Point(1, 398);
             this.letterReadOptionTablePanel.Margin = new System.Windows.Forms.Padding(1);
             this.letterReadOptionTablePanel.Name = "letterReadOptionTablePanel";
             this.letterReadOptionTablePanel.RowCount = 1;
@@ -298,6 +282,7 @@
             this.decryptMsgBtn.TabIndex = 10;
             this.tooltipHelper.SetToolTip(this.decryptMsgBtn, "Расшифровать");
             this.decryptMsgBtn.UseVisualStyleBackColor = true;
+            this.decryptMsgBtn.Click += new System.EventHandler(this.decryptMsgBtn_Click);
             // 
             // detachFilesBtn
             // 
@@ -314,6 +299,7 @@
             this.detachFilesBtn.TabIndex = 9;
             this.tooltipHelper.SetToolTip(this.detachFilesBtn, "Открепить файлы");
             this.detachFilesBtn.UseVisualStyleBackColor = true;
+            this.detachFilesBtn.Click += new System.EventHandler(this.detachFilesBtn_Click);
             // 
             // msgReadWeb
             // 
@@ -321,14 +307,14 @@
             this.msgReadWeb.Location = new System.Drawing.Point(3, 3);
             this.msgReadWeb.MinimumSize = new System.Drawing.Size(20, 20);
             this.msgReadWeb.Name = "msgReadWeb";
-            this.msgReadWeb.Size = new System.Drawing.Size(712, 329);
+            this.msgReadWeb.Size = new System.Drawing.Size(712, 331);
             this.msgReadWeb.TabIndex = 7;
             // 
             // detachFilesList
             // 
             this.detachFilesList.Dock = System.Windows.Forms.DockStyle.Fill;
             this.detachFilesList.HideSelection = false;
-            this.detachFilesList.Location = new System.Drawing.Point(3, 338);
+            this.detachFilesList.Location = new System.Drawing.Point(3, 340);
             this.detachFilesList.MultiSelect = false;
             this.detachFilesList.Name = "detachFilesList";
             this.detachFilesList.Size = new System.Drawing.Size(712, 54);
@@ -410,7 +396,7 @@
             this.lettersTablePanel.RowCount = 2;
             this.lettersTablePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.lettersTablePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 35F));
-            this.lettersTablePanel.Size = new System.Drawing.Size(300, 490);
+            this.lettersTablePanel.Size = new System.Drawing.Size(300, 492);
             this.lettersTablePanel.TabIndex = 1;
             // 
             // msgListOptionsPanel
@@ -419,7 +405,7 @@
             this.msgListOptionsPanel.Controls.Add(this.rightBtn);
             this.msgListOptionsPanel.Controls.Add(this.leftBtn);
             this.msgListOptionsPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.msgListOptionsPanel.Location = new System.Drawing.Point(1, 456);
+            this.msgListOptionsPanel.Location = new System.Drawing.Point(1, 458);
             this.msgListOptionsPanel.Margin = new System.Windows.Forms.Padding(1);
             this.msgListOptionsPanel.Name = "msgListOptionsPanel";
             this.msgListOptionsPanel.Size = new System.Drawing.Size(298, 33);
@@ -439,6 +425,7 @@
             this.rightBtn.Size = new System.Drawing.Size(145, 33);
             this.rightBtn.TabIndex = 3;
             this.rightBtn.UseVisualStyleBackColor = true;
+            this.rightBtn.Click += new System.EventHandler(this.rightBtn_Click);
             // 
             // leftBtn
             // 
@@ -454,6 +441,7 @@
             this.leftBtn.Size = new System.Drawing.Size(145, 33);
             this.leftBtn.TabIndex = 2;
             this.leftBtn.UseVisualStyleBackColor = true;
+            this.leftBtn.Click += new System.EventHandler(this.leftBtn_Click);
             // 
             // lettersList
             // 
@@ -464,10 +452,11 @@
             this.lettersList.Margin = new System.Windows.Forms.Padding(1);
             this.lettersList.MultiSelect = false;
             this.lettersList.Name = "lettersList";
-            this.lettersList.Size = new System.Drawing.Size(298, 453);
+            this.lettersList.Size = new System.Drawing.Size(298, 455);
             this.lettersList.TabIndex = 1;
             this.lettersList.UseCompatibleStateImageBehavior = false;
             this.lettersList.View = System.Windows.Forms.View.List;
+            this.lettersList.SelectedIndexChanged += new System.EventHandler(this.lettersList_SelectedIndexChanged);
             // 
             // boxesList
             // 
@@ -480,10 +469,15 @@
             this.boxesList.Location = new System.Drawing.Point(3, 3);
             this.boxesList.MultiSelect = false;
             this.boxesList.Name = "boxesList";
-            this.boxesList.Size = new System.Drawing.Size(150, 490);
+            this.boxesList.Size = new System.Drawing.Size(150, 492);
             this.boxesList.TabIndex = 0;
             this.boxesList.UseCompatibleStateImageBehavior = false;
             this.boxesList.View = System.Windows.Forms.View.List;
+            this.boxesList.SelectedIndexChanged += new System.EventHandler(this.boxesList_SelectedIndexChanged);
+            // 
+            // columnHeader1
+            // 
+            this.columnHeader1.Width = 145;
             // 
             // senderPage
             // 
@@ -496,7 +490,7 @@
             this.senderPage.Location = new System.Drawing.Point(4, 25);
             this.senderPage.Name = "senderPage";
             this.senderPage.Padding = new System.Windows.Forms.Padding(3);
-            this.senderPage.Size = new System.Drawing.Size(1174, 496);
+            this.senderPage.Size = new System.Drawing.Size(1174, 524);
             this.senderPage.TabIndex = 1;
             this.senderPage.Text = "Отправка письма";
             // 
@@ -506,7 +500,7 @@
             this.msgSendTxt.Location = new System.Drawing.Point(3, 108);
             this.msgSendTxt.Name = "msgSendTxt";
             this.msgSendTxt.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.ForcedVertical;
-            this.msgSendTxt.Size = new System.Drawing.Size(1168, 335);
+            this.msgSendTxt.Size = new System.Drawing.Size(1168, 363);
             this.msgSendTxt.TabIndex = 11;
             this.msgSendTxt.Text = "";
             // 
@@ -759,7 +753,7 @@
             this.letterSendOptionsTablePanel.Controls.Add(this.letterSendBtn, 5, 0);
             this.letterSendOptionsTablePanel.Controls.Add(this.detachLastFileBtn, 2, 0);
             this.letterSendOptionsTablePanel.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.letterSendOptionsTablePanel.Location = new System.Drawing.Point(3, 443);
+            this.letterSendOptionsTablePanel.Location = new System.Drawing.Point(3, 471);
             this.letterSendOptionsTablePanel.Name = "letterSendOptionsTablePanel";
             this.letterSendOptionsTablePanel.RowCount = 1;
             this.letterSendOptionsTablePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
@@ -1536,24 +1530,38 @@
             this.updateServersWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.updateServersWorker_DoWork);
             this.updateServersWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.updateServersWorker_RunWorkerCompleted);
             // 
+            // lettersStatus
+            // 
+            this.lettersStatus.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.lettersStatus.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.lettersStatusLabel});
+            this.lettersStatus.Location = new System.Drawing.Point(3, 495);
+            this.lettersStatus.Name = "lettersStatus";
+            this.lettersStatus.Size = new System.Drawing.Size(1168, 26);
+            this.lettersStatus.TabIndex = 6;
+            this.lettersStatus.Text = "statusStrip1";
+            // 
+            // lettersStatusLabel
+            // 
+            this.lettersStatusLabel.Name = "lettersStatusLabel";
+            this.lettersStatusLabel.Size = new System.Drawing.Size(55, 20);
+            this.lettersStatusLabel.Text = "Статус:";
+            // 
             // ClientForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1182, 553);
             this.Controls.Add(this.tabControl1);
-            this.Controls.Add(this.menuStrip1);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MainMenuStrip = this.menuStrip1;
             this.MinimumSize = new System.Drawing.Size(1200, 600);
             this.Name = "ClientForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "StudMail";
-            this.menuStrip1.ResumeLayout(false);
-            this.menuStrip1.PerformLayout();
             this.tabControl1.ResumeLayout(false);
             this.lettersPage.ResumeLayout(false);
+            this.lettersPage.PerformLayout();
             this.msgLetterPanel.ResumeLayout(false);
             this.letterReadTablePanel.ResumeLayout(false);
             this.letterReadOptionTablePanel.ResumeLayout(false);
@@ -1584,14 +1592,13 @@
             this.panel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.serversTable)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.checkInputPrv)).EndInit();
+            this.lettersStatus.ResumeLayout(false);
+            this.lettersStatus.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
         #endregion
-
-        private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage lettersPage;
         private System.Windows.Forms.TabPage senderPage;
@@ -1689,7 +1696,6 @@
         private System.Windows.Forms.ListView detachFilesList;
         private System.Windows.Forms.ListView lettersList;
         private System.Windows.Forms.Button detachLastFileBtn;
-        private System.Windows.Forms.ToolStripMenuItem updateLettersBtn;
         private System.ComponentModel.BackgroundWorker updateBooksWorker;
         private System.ComponentModel.BackgroundWorker updateServersWorker;
         private System.Windows.Forms.DataGridViewCheckBoxColumn selectedKeyCol;
@@ -1709,5 +1715,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn pop3HostCol;
         private System.Windows.Forms.DataGridViewTextBoxColumn pop3PortCol;
         private System.Windows.Forms.DataGridViewCheckBoxColumn sslCol;
+        private System.Windows.Forms.StatusStrip lettersStatus;
+        private System.Windows.Forms.ToolStripStatusLabel lettersStatusLabel;
     }
 }

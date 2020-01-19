@@ -14,9 +14,10 @@ namespace MailClient
 {
     public class MailClient
     {
-        public SpecialFolder CurrentFolder;
+        public IMailFolder CurrentFolder;
         public UserInfo CurrentUser;
         public MimeMessage CurrentReadMsg;
+        public List<MimeMessage> Letters;
         public IList<IMailFolder> Folders;
         public static NetworkStatus CurrentNetwork;
         public static object ObjLock;
@@ -33,7 +34,7 @@ namespace MailClient
         public MailClient(UserInfo user)
         {
             var domain = AuthHelper.GetDomain(user.Email);
-            CurrentFolder = SpecialFolder.All;
+            CurrentFolder = null;
             CurrentUser = user;
             CurrentUser.Server = DBServers.GetServerInfo(DBConnection.Connection, domain);
             CurrentUser.RSABooks = DBRSABooks.GetBooks(DBConnection.Connection, (int) user.Id);
@@ -80,18 +81,12 @@ namespace MailClient
             }
         }
 
-        public void AuthUser(string email, string password)
-        {
-
-        }
-
         public bool GetFolders()
         {
             try
             {
                 var domain = AuthHelper.GetDomain(CurrentUser.Email);
                 var server = DBServers.GetServerInfo(DBConnection.Connection, domain);
-                var list = new List<FolderInfo>();
 
                 using (var client = new ImapClient())
                 {
@@ -99,7 +94,6 @@ namespace MailClient
                     client.Connect(server.ImapHost, (int) server.ImapPort, server.IsSsl);
                     client.Authenticate(CurrentUser.Email, CurrentUser.Password);
 
-                    var inbox = client.Inbox;
                     Folders = client.GetFolders(client.PersonalNamespaces.First());
 
                     client.Disconnect(true);
@@ -112,14 +106,74 @@ namespace MailClient
             }
         }
 
-        public List<LetterInfo> GetLetters()
+        public bool GetLetters(int folderId, int curPage)
         {
-            return null;
+            try
+            {
+                var counter = 0;
+                var domain = AuthHelper.GetDomain(CurrentUser.Email);
+                var server = DBServers.GetServerInfo(DBConnection.Connection, domain);
+
+                using (var client = new ImapClient())
+                {
+                    client.ServerCertificateValidationCallback = (s, c, h, ex) => true;
+                    client.Connect(server.ImapHost, (int) server.ImapPort, server.IsSsl);
+                    client.Authenticate(CurrentUser.Email, CurrentUser.Password);
+
+                    CurrentFolder = client.GetFolder(Folders[folderId].FullName);
+                    CurrentFolder.Open(FolderAccess.ReadOnly);
+                    Letters = new List<MimeMessage>();
+
+                    for (int i = curPage * 500; i < CurrentFolder.Count; i++)
+                    {
+                        var msg = CurrentFolder.GetMessage(i);
+
+                        Letters.Add(msg);
+                        counter++;
+
+                        if (counter >= 50) break;
+                    }
+
+                    CurrentFolder.Close();
+                    client.Disconnect(true);
+                    return true;
+                }
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            
         }
 
-        public LetterInfo GetLetter()
+        public MimeMessage GetLetter(int folderId, int curPage, int letterId)
         {
-            return null;
+            try
+            {
+                var domain = AuthHelper.GetDomain(CurrentUser.Email);
+                var server = DBServers.GetServerInfo(DBConnection.Connection, domain);
+                MimeMessage msg;
+
+                using (var client = new ImapClient())
+                {
+                    client.ServerCertificateValidationCallback = (s, c, h, ex) => true;
+                    client.Connect(server.ImapHost, (int) server.ImapPort, server.IsSsl);
+                    client.Authenticate(CurrentUser.Email, CurrentUser.Password);
+
+                    CurrentFolder = client.GetFolder(Folders[folderId].FullName);
+                    CurrentFolder.Open(FolderAccess.ReadOnly);
+
+                    msg = CurrentFolder.GetMessage(curPage * 500 + letterId);
+
+                    CurrentFolder.Close();
+                    client.Disconnect(true);
+                    return msg;
+                }
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
 
         public bool SendLetter(MimeMessage msg)

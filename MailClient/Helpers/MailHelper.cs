@@ -2,6 +2,7 @@
 using MimeKit;
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace MailClient.Helpers
 {
@@ -33,8 +34,10 @@ namespace MailClient.Helpers
             var iv = Convert.ToBase64String(tdesKeys[1]);
             var builder = new BodyBuilder();
 
-            encryptedMsg += tdesTxt + "&" + encryptedKey + "&" + iv + "&";
-            encryptedMsg += DSA.CreateSign(encryptedMsg, book.OwnPrivateECP);
+            encryptedMsg += tdesTxt + "&" + encryptedKey + "&" + iv;
+            
+            // Подпись ЭЦП при помощи DSA
+            //encryptedMsg += DSA.CreateSign(encryptedMsg, book.OwnPrivateECP);
 
             builder.TextBody = encryptedMsg;
             builder.HtmlBody = encryptedMsg;
@@ -55,6 +58,25 @@ namespace MailClient.Helpers
             mailMsg.Body = builder.ToMessageBody();
 
             return mailMsg;
+        }
+
+        public static string ReturnMsg(string body, string privateKey)
+        {
+            // Текст&ключ&вектор
+            var encryptedItems = body.Split(new string[] { "&" }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (encryptedItems.Length == 3)
+            {
+                var encryptedKey = Convert.FromBase64String(encryptedItems[1]);
+                var keyHash = RSA.Decrypt(encryptedKey, privateKey);
+                var iv = Convert.FromBase64String(encryptedItems[2]);
+                var txtHash = Convert.FromBase64String(encryptedItems[0]);
+                var decryptedTxt = TripleDES.Decrypt(txtHash, keyHash, iv);
+
+                return decryptedTxt;
+            }
+
+            return null;
         }
     }
 }

@@ -69,11 +69,11 @@ namespace MailClient.Crypto
                 tdes.Key = key;
                 tdes.IV = iv;
 
-                ICryptoTransform encryptor = tdes.CreateEncryptor(tdes.Key, tdes.IV);
+                ICryptoTransform decryptor = tdes.CreateDecryptor(tdes.Key, tdes.IV);
 
-                using (var mStream = new MemoryStream())
+                using (var mStream = new MemoryStream(msgHash))
                 {
-                    using (var cStream = new CryptoStream(mStream, encryptor, CryptoStreamMode.Read))
+                    using (var cStream = new CryptoStream(mStream, decryptor, CryptoStreamMode.Read))
                     {
                         using (var reader = new StreamReader(cStream))
                         {
@@ -85,7 +85,5 @@ namespace MailClient.Crypto
 
             return plaintext;
         }
-
-
     }
 }

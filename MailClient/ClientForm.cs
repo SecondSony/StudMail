@@ -11,6 +11,7 @@ using System.Drawing;
 using System.Drawing.Text;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 
 namespace MailClient
@@ -25,21 +26,12 @@ namespace MailClient
             ServersTab = 3
         }
 
-        enum FolderState
-        {
-            NONE = -1,
-            INBOX = 0,
-            SENT = 1,
-            DRAFT = 2,
-            JUNK = 3,
-            TRASH = 4,
-        }
-
+        private int curPage;
+        private int curFolder;
         private MailClient StudMail;
-        private List<FolderInfo> Folders;
+        private MimeMessage CurrentLetter;
         private List<string> currentPaths = new List<string>();
         private bool isEncryptMsg = false;
-        private FolderState CurrentFolder;
 
         public ClientForm(UserInfo user)
         {
@@ -47,8 +39,12 @@ namespace MailClient
 
             StudMail = new MailClient(user);
             UpdateFolders();
-
             StudMail.GetFolders();
+
+            keySignCheckBtn.Hide();
+            keySignMsgBtn.Hide();
+            msgListOptionsPanel.Hide();
+            msgLetterPanel.Hide();
 
             InitFont();
             updateBooksWorker.RunWorkerAsync();
@@ -65,6 +61,7 @@ namespace MailClient
             DBFolders.SyncFolders(DBConnection.Connection, list, StudMail.UserId);
             StudMail.UserFolders = DBFolders.GetFolders(DBConnection.Connection, StudMail.UserId);
             boxesList.Items.Clear();
+            lettersList.Items.Clear();
 
             foreach (var folder in StudMail.UserFolders)
             {
@@ -74,7 +71,15 @@ namespace MailClient
 
         private void UpdateLetters()
         {
+            lettersList.Items.Clear();
 
+            if (StudMail.GetLetters(curFolder, curPage))
+            {
+                foreach (var letter in StudMail.Letters)
+                {
+                    lettersList.Items.Add(letter.From[0].ToString());
+                }
+            }
         }
 
         private void UpdateBooks(List<RSABookInfo> books)
@@ -132,8 +137,8 @@ namespace MailClient
             senderEmailTxt.Text = "";
             themeReadTxt.Text = "";
             msgReadWeb.Navigate("about:blank");
+            msgReadWeb.Document.Write("");
             detachFilesList.Items.Clear();
-
         }
 
         private void ClearLetterSend()
@@ -145,6 +150,32 @@ namespace MailClient
             msgSendTxt.Text = "";
             attachFilesList.Items.Clear();
             currentPaths.Clear();
+
+            if (isEncryptMsg) encryptMsgBtn_Click(null, null);
+        }
+
+        private void LoadMsg()
+        {
+            var msg = CurrentLetter;
+            string body = string.IsNullOrEmpty(msg.TextBody) ? msg.HtmlBody : msg.TextBody;
+
+            msgLetterPanel.Hide();
+            //ClearLetterRead();
+
+            senderEmailTxt.Text = msg.From[0].ToString();
+            themeReadTxt.Text = msg.Subject;
+            msgReadWeb.Navigate("about:blank");
+            msgReadWeb.Document.Write(body);
+
+            detachFilesList.Items.Clear();
+
+            foreach (var attachment in msg.Attachments)
+            {
+                var filename = attachment.ContentDisposition.FileName ?? attachment.ContentType.Name;
+                detachFilesList.Items.Add(filename);
+            }
+
+            msgLetterPanel.Show();
         }
 
         private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
@@ -152,6 +183,8 @@ namespace MailClient
             switch (tabControl1.SelectedIndex)
             {
                 case (int) TabState.ReadMsgTab:
+                    UpdateFolders();
+                    msgLetterPanel.Hide();
                     break;
                 case (int) TabState.SendMsgTab:
                     ClearLetterSend();
@@ -167,7 +200,132 @@ namespace MailClient
 
         #region Обработка вкладки чтения писем
 
+        private void boxesList_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // Выгружаем с сервера письма текущей папки
+            
+            var indexes = boxesList.SelectedIndices;
 
+            curPage = 0;
+
+            foreach (int i in indexes)
+            {
+                curFolder = i;
+                break;
+            }
+
+
+            if (curFolder == -1)
+            {
+                return;
+            }
+
+            msgLetterPanel.Hide();
+            lettersStatusLabel.Text = "Статус: Идёт загрузка писем...";
+            UpdateLetters();
+            lettersStatusLabel.Text = "Статус: Готово";
+        }
+
+        private void lettersList_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // Выгружаем письмо и сохраняем в базу данных
+
+            var indexes = lettersList.SelectedIndices;
+            var letterId = -1;
+
+            foreach (int i in indexes)
+            {
+                letterId = i;
+                break;
+            }
+
+            if (letterId == -1)
+            {
+                msgLetterPanel.Hide();
+                ClearLetterRead();
+                CurrentLetter = null;
+                return;
+            }
+
+            CurrentLetter = StudMail.GetLetter(curFolder, curPage, letterId);
+            lettersStatusLabel.Text = $"Статус: Идёт загрузка письма...";
+            LoadMsg();
+            lettersStatusLabel.Text = "Статус: Готово";
+        }
+
+        private void detachFilesBtn_Click(object sender, EventArgs e)
+        {
+            if (CurrentLetter != null)
+            {
+                foreach (MimeEntity attachment in CurrentLetter.Attachments)
+                {
+                    var filename = attachment.ContentDisposition.FileName ?? attachment.ContentType.Name;
+                    var sfd = new SaveFileDialog();
+
+                    if (sfd.ShowDialog() == DialogResult.OK)
+                    {
+                        filename = $"{Path.GetDirectoryName(sfd.FileName)}\\{filename}";
+                        
+                        using (var stream = File.Create(filename))
+                        {
+                            if (attachment is MessagePart)
+                            {
+                                var rfc822 = (MessagePart) attachment;
+                                rfc822.Message.WriteTo(stream);
+                            }
+                            else
+                            {
+                                var part = (MimePart) attachment;
+                                part.Content.DecodeTo(stream);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private void decryptMsgBtn_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show(CurrentLetter.HtmlBody, "Исходный текст");
+
+            var userId = StudMail.UserId;
+            var msg = CurrentLetter;
+            var books = DBRSABooks.GetBooks(DBConnection.Connection, userId);
+            var body = string.IsNullOrEmpty(msg.TextBody) ? msg.HtmlBody : msg.TextBody;
+            var decryptedTxt = "";
+            bool isFound = false;
+
+            try
+            {
+                foreach (var book in books)
+                {
+                    if (book.Email == msg.From[0].ToString())
+                    {
+                        decryptedTxt = MailHelper.ReturnMsg(body, book.OwnPrivate);
+
+                        if (decryptedTxt != null) isFound = true;
+
+                        break;
+                    }
+                }
+
+                MessageBox.Show(isFound ? decryptedTxt : body, "Расшифрованное сообщение");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Непредвиденная ошибка");
+            }
+        }
+
+        private void leftBtn_Click(object sender, EventArgs e)
+        {
+            // curPage = Math.Max(--curPage, 0);
+        }
+
+        private void rightBtn_Click(object sender, EventArgs e)
+        {
+            // curPage = Math.Min(++curPage * 50, StudMail.CurrentFolder.Count);
+        }
 
         #endregion
 
@@ -272,7 +430,10 @@ namespace MailClient
         private void detachLastFileBtn_Click(object sender, EventArgs e)
         {
             if (attachFilesList.Items.Count != 0)
+            {
                 attachFilesList.Items.RemoveAt(attachFilesList.Items.Count - 1);
+                currentPaths.RemoveAt(attachFilesList.Items.Count - 1);
+            }
         }
 
         private void encryptMsgBtn_Click(object sender, EventArgs e)
@@ -282,6 +443,7 @@ namespace MailClient
             isEncryptMsg = !isEncryptMsg;
         }
 
+        // TODO:
         private void keySignMsgBtn_Click(object sender, EventArgs e)
         {
 
