@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Text;
 using System.IO;
@@ -165,7 +166,9 @@ namespace MailClient
             senderEmailTxt.Text = msg.From[0].ToString();
             themeReadTxt.Text = msg.Subject;
             msgReadWeb.Navigate("about:blank");
+            msgReadWeb.Document.OpenNew(false);
             msgReadWeb.Document.Write(body);
+            msgReadWeb.Refresh();
 
             detachFilesList.Items.Clear();
 
@@ -176,6 +179,28 @@ namespace MailClient
             }
 
             msgLetterPanel.Show();
+        }
+
+        /// <summary>
+        /// Сохранение содержания письма в файл и открытие
+        /// </summary>
+        /// <param name="msg"></param>
+        private void SaveMsgLocal(string msg)
+        {
+            var email = CurrentLetter.From[0].ToString();
+            var subject = string.IsNullOrEmpty(CurrentLetter.Subject) ? "" : $"_{CurrentLetter.Subject}";
+            var path = $"{Environment.CurrentDirectory}\\messages";
+            var filename = $"{path}\\{email}{subject}.txt";
+
+            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+
+            using (var writer = new StreamWriter(filename, false))
+            {
+                writer.Write(msg);
+            }
+                
+            // Открытие файла
+            Process.Start(filename);
         }
 
         private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
@@ -286,8 +311,6 @@ namespace MailClient
 
         private void decryptMsgBtn_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(CurrentLetter.HtmlBody, "Исходный текст");
-
             var userId = StudMail.UserId;
             var msg = CurrentLetter;
             var books = DBRSABooks.GetBooks(DBConnection.Connection, userId);
@@ -303,7 +326,11 @@ namespace MailClient
                     {
                         decryptedTxt = MailHelper.ReturnMsg(body, book.OwnPrivate);
 
-                        if (decryptedTxt != null) isFound = true;
+                        if (decryptedTxt != null)
+                        {
+                            SaveMsgLocal(decryptedTxt);
+                            isFound = true;
+                        }
 
                         break;
                     }
@@ -516,27 +543,30 @@ namespace MailClient
                         {
                             if (book.Email == receiver.ToString())
                             {
-                                var mailMsg = MailHelper.GenEncryptedMsg(msg, body, currentPaths, book);
+                                if (book.EmailPublic != "")
+                                {
+                                    var mailMsg = MailHelper.GenEncryptedMsg(msg, body, currentPaths, book);
 
-                                if (StudMail.SendLetter(mailMsg))
-                                {
-                                    MessageBox.Show($"Сообщение отправлено адресату: {receiver.ToString()}");
-                                }
-                                else
-                                {
-                                    MessageBox.Show($"Не удалось отправить сообщение адресату: {receiver.ToString()}");
+                                    if (StudMail.SendLetter(mailMsg))
+                                    {
+                                        MessageBox.Show($"Сообщение отправлено адресату: {receiver.ToString()}");
+                                    }
+                                    else
+                                    {
+                                        MessageBox.Show($"Не удалось отправить сообщение адресату: {receiver.ToString()}");
+                                    }
+
+                                    found = true;
                                 }
 
                                 // Нужно ещё записать в БД в зашифрованном виде, но не хватает uid
-
-                                found = true;
                                 break;
                             }
                         }
 
                         if (!found)
                         {
-                            MessageBox.Show($"{receiver.ToString()} не имеет публичного ключа");
+                            MessageBox.Show($"Вы не имеете публичного ключа {receiver.ToString()}");
                         }
                     }
                 }
@@ -593,7 +623,7 @@ namespace MailClient
                 return;
             }
 
-            /*if (string.IsNullOrEmpty(remoteKey))
+            if (string.IsNullOrEmpty(remoteKey))
             {
                 checkInputPrv.SetError(keysRemoteTxt, "Заполните данное поле");
                 return;
@@ -603,7 +633,7 @@ namespace MailClient
             {
                 checkInputPrv.SetError(keysRemoteSignTxt, "Заполните данное поле");
                 return;
-            }*/
+            }
 
             book = new RSABookInfo()
             {

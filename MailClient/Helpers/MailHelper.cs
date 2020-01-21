@@ -30,7 +30,7 @@ namespace MailClient.Helpers
             var mailMsg = msg;
             var tdesKeys = TripleDES.GenKey();
             var tdesTxt = Convert.ToBase64String(TripleDES.Encrypt(body, tdesKeys[0], tdesKeys[1]));
-            var encryptedKey = Convert.ToBase64String(RSA.Encrypt(tdesKeys[0], book.OwnPublic));
+            var encryptedKey = Convert.ToBase64String(RSA.Encrypt(tdesKeys[0], book.EmailPublic));
             var iv = Convert.ToBase64String(tdesKeys[1]);
             var builder = new BodyBuilder();
 

@@ -17,7 +17,6 @@ namespace MailClient
             DBConnection.Open();
         }
 
-        // TODO:
         private void signInBtn_Click(object sender, EventArgs e)
         {
             var email = emailTxt.Text.Trim(' ');

@@ -4,12 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-// Вопросы с хэшем пароля, проверкой существующего аккаунта, изменчивости юзера в AuthUser, 
-// DBFolders, записи в БД юзеров, папок, писем, зачем Property, MailClient
 namespace MailClient.DB
 {
     public class DBUsers

@@ -82,7 +82,6 @@ namespace MailClient.DB
             return null;
         }
 
-        // TODO:
         public static bool IsLetterExists(SQLiteConnection connection, long folderId, long uid)
         {
             var reqStr = $"SELECT letters.uid FROM letters WHERE letters.folder_id='{folderId}' " +
@@ -100,7 +99,6 @@ namespace MailClient.DB
             return false;
         }
 
-        // TODO:
         public static bool Add(SQLiteConnection connection, LetterInfo newItem)
         {
             var reqStr = $"INSERT INTO letters(folder_id, uid, message_base64) " +

@@ -52,6 +52,8 @@
             this.lettersList = new System.Windows.Forms.ListView();
             this.boxesList = new System.Windows.Forms.ListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.lettersStatus = new System.Windows.Forms.StatusStrip();
+            this.lettersStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.senderPage = new System.Windows.Forms.TabPage();
             this.msgSendTxt = new System.Windows.Forms.RichTextBox();
             this.panel4 = new System.Windows.Forms.Panel();
@@ -146,8 +148,6 @@
             this.tooltipHelper = new System.Windows.Forms.ToolTip(this.components);
             this.updateBooksWorker = new System.ComponentModel.BackgroundWorker();
             this.updateServersWorker = new System.ComponentModel.BackgroundWorker();
-            this.lettersStatus = new System.Windows.Forms.StatusStrip();
-            this.lettersStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.tabControl1.SuspendLayout();
             this.lettersPage.SuspendLayout();
             this.msgLetterPanel.SuspendLayout();
@@ -156,6 +156,7 @@
             this.letterHeaderTablePanel.SuspendLayout();
             this.lettersTablePanel.SuspendLayout();
             this.msgListOptionsPanel.SuspendLayout();
+            this.lettersStatus.SuspendLayout();
             this.senderPage.SuspendLayout();
             this.panel4.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.fontSizeBtn)).BeginInit();
@@ -174,7 +175,6 @@
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.serversTable)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.checkInputPrv)).BeginInit();
-            this.lettersStatus.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -280,7 +280,7 @@
             this.decryptMsgBtn.Name = "decryptMsgBtn";
             this.decryptMsgBtn.Size = new System.Drawing.Size(236, 31);
             this.decryptMsgBtn.TabIndex = 10;
-            this.tooltipHelper.SetToolTip(this.decryptMsgBtn, "Расшифровать");
+            this.tooltipHelper.SetToolTip(this.decryptMsgBtn, "Расшифровать и сохранить письмо");
             this.decryptMsgBtn.UseVisualStyleBackColor = true;
             this.decryptMsgBtn.Click += new System.EventHandler(this.decryptMsgBtn_Click);
             // 
@@ -478,6 +478,23 @@
             // columnHeader1
             // 
             this.columnHeader1.Width = 145;
+            // 
+            // lettersStatus
+            // 
+            this.lettersStatus.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.lettersStatus.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.lettersStatusLabel});
+            this.lettersStatus.Location = new System.Drawing.Point(3, 495);
+            this.lettersStatus.Name = "lettersStatus";
+            this.lettersStatus.Size = new System.Drawing.Size(1168, 26);
+            this.lettersStatus.TabIndex = 6;
+            this.lettersStatus.Text = "statusStrip1";
+            // 
+            // lettersStatusLabel
+            // 
+            this.lettersStatusLabel.Name = "lettersStatusLabel";
+            this.lettersStatusLabel.Size = new System.Drawing.Size(55, 20);
+            this.lettersStatusLabel.Text = "Статус:";
             // 
             // senderPage
             // 
@@ -858,7 +875,7 @@
             this.keysPage.Location = new System.Drawing.Point(4, 25);
             this.keysPage.Name = "keysPage";
             this.keysPage.Padding = new System.Windows.Forms.Padding(3);
-            this.keysPage.Size = new System.Drawing.Size(1174, 496);
+            this.keysPage.Size = new System.Drawing.Size(1174, 524);
             this.keysPage.TabIndex = 2;
             this.keysPage.Text = "Ключи";
             this.keysPage.UseVisualStyleBackColor = true;
@@ -875,7 +892,7 @@
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 1;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(1168, 490);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(1168, 518);
             this.tableLayoutPanel2.TabIndex = 0;
             // 
             // keysTable
@@ -899,7 +916,7 @@
             this.keysTable.RowHeadersVisible = false;
             this.keysTable.RowHeadersWidth = 51;
             this.keysTable.RowTemplate.Height = 24;
-            this.keysTable.Size = new System.Drawing.Size(862, 484);
+            this.keysTable.Size = new System.Drawing.Size(862, 512);
             this.keysTable.TabIndex = 10;
             this.keysTable.TabStop = false;
             // 
@@ -967,7 +984,7 @@
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel2.Location = new System.Drawing.Point(871, 3);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(294, 484);
+            this.panel2.Size = new System.Drawing.Size(294, 512);
             this.panel2.TabIndex = 0;
             // 
             // panel3
@@ -990,7 +1007,7 @@
             this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel3.Location = new System.Drawing.Point(0, 0);
             this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(294, 484);
+            this.panel3.Size = new System.Drawing.Size(294, 512);
             this.panel3.TabIndex = 1;
             // 
             // remoteGrp
@@ -1047,7 +1064,7 @@
             this.genKeysGrp.Controls.Add(this.genKeySignBtn);
             this.genKeysGrp.Controls.Add(this.genKeyBtn);
             this.genKeysGrp.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.genKeysGrp.Location = new System.Drawing.Point(0, 409);
+            this.genKeysGrp.Location = new System.Drawing.Point(0, 437);
             this.genKeysGrp.Name = "genKeysGrp";
             this.genKeysGrp.Size = new System.Drawing.Size(294, 75);
             this.genKeysGrp.TabIndex = 10;
@@ -1205,7 +1222,7 @@
             this.serversPage.Location = new System.Drawing.Point(4, 25);
             this.serversPage.Name = "serversPage";
             this.serversPage.Padding = new System.Windows.Forms.Padding(3);
-            this.serversPage.Size = new System.Drawing.Size(1174, 496);
+            this.serversPage.Size = new System.Drawing.Size(1174, 524);
             this.serversPage.TabIndex = 3;
             this.serversPage.Text = "Почтовые сервера";
             this.serversPage.UseVisualStyleBackColor = true;
@@ -1222,7 +1239,7 @@
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(1168, 490);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(1168, 518);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // panel1
@@ -1248,7 +1265,7 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(871, 3);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(294, 484);
+            this.panel1.Size = new System.Drawing.Size(294, 512);
             this.panel1.TabIndex = 0;
             // 
             // removeServersBtn
@@ -1442,7 +1459,7 @@
             this.serversTable.RowHeadersVisible = false;
             this.serversTable.RowHeadersWidth = 51;
             this.serversTable.RowTemplate.Height = 24;
-            this.serversTable.Size = new System.Drawing.Size(862, 484);
+            this.serversTable.Size = new System.Drawing.Size(862, 512);
             this.serversTable.TabIndex = 9;
             this.serversTable.TabStop = false;
             // 
@@ -1530,23 +1547,6 @@
             this.updateServersWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.updateServersWorker_DoWork);
             this.updateServersWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.updateServersWorker_RunWorkerCompleted);
             // 
-            // lettersStatus
-            // 
-            this.lettersStatus.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.lettersStatus.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.lettersStatusLabel});
-            this.lettersStatus.Location = new System.Drawing.Point(3, 495);
-            this.lettersStatus.Name = "lettersStatus";
-            this.lettersStatus.Size = new System.Drawing.Size(1168, 26);
-            this.lettersStatus.TabIndex = 6;
-            this.lettersStatus.Text = "statusStrip1";
-            // 
-            // lettersStatusLabel
-            // 
-            this.lettersStatusLabel.Name = "lettersStatusLabel";
-            this.lettersStatusLabel.Size = new System.Drawing.Size(55, 20);
-            this.lettersStatusLabel.Text = "Статус:";
-            // 
             // ClientForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -1569,6 +1569,8 @@
             this.letterHeaderTablePanel.PerformLayout();
             this.lettersTablePanel.ResumeLayout(false);
             this.msgListOptionsPanel.ResumeLayout(false);
+            this.lettersStatus.ResumeLayout(false);
+            this.lettersStatus.PerformLayout();
             this.senderPage.ResumeLayout(false);
             this.panel4.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.fontSizeBtn)).EndInit();
@@ -1592,8 +1594,6 @@
             this.panel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.serversTable)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.checkInputPrv)).EndInit();
-            this.lettersStatus.ResumeLayout(false);
-            this.lettersStatus.PerformLayout();
             this.ResumeLayout(false);
 
         }
